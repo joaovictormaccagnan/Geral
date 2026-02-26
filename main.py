@@ -6,7 +6,7 @@ fizzbuzz = 0
 try:
     num_int = int(numero) 
     if num_int <= 0:
-        exit()
+        raise ValueError
 except:
     print("Não é um número inteiro positivo")
     exit()
