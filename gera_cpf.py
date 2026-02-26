@@ -1,3 +1,4 @@
+
 import random
 
 nove_digitos = ""
@@ -7,7 +8,7 @@ for p in range(9):
 
 
 
-
+print(f"Nove dígitos gerados: {nove_digitos}")  
 indice = 10
 adicao = 0
 digito_1 = 0
