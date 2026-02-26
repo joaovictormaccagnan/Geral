@@ -1,5 +1,13 @@
-cpf = '39026812094'
-nove_digitos = cpf [:9] 
+import random
+
+nove_digitos = ""
+for p in range(9):
+    nove_digitos += str(random.randint(0, 9))
+
+
+
+
+
 indice = 10
 adicao = 0
 digito_1 = 0
@@ -23,7 +31,4 @@ digito_2 += (adicao_2 * 10) % 11
 digito_2 = digito_2 if digito_2 <= 9 else 0
 
 cpf_gerado = nove_digitos + str(digito_1) + str(digito_2)
-if cpf == cpf_gerado:
-    print("Seu CPF esta correto")
-else:
-    print("CPF invalido")
+print(f"CPF Gerado: {cpf_gerado}") 
