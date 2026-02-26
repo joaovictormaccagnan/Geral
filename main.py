@@ -1,18 +1,4 @@
-"""
-Peça ao usuário um número inteiro positivo.
-Gere todos os números de 1 até esse número.
 
-Para cada número:
-Se for múltiplo de 3, mostre Fizz
-Se for múltiplo de 5, mostre Buzz
-Se for múltiplo de 3 e 5, mostre FizzBuzz
-Caso contrário, mostre o próprio número
-Mostre tudo em ordem, um por linha.
-
-Regras:
-Use for e range.
-Não use funções prontas de verificação de múltiplo além do operador %.
-"""
 numero = input("Digite um número: ")
 fizz = 0
 buzz = 0
