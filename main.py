@@ -1,4 +1,4 @@
-
+print("Bem-vindo ao FizzBuzz!")
 numero = input("Digite um número: ")
 fizz = 0
 buzz = 0
