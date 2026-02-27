@@ -6,7 +6,6 @@ for p in range(9):
 
 
 
-print("Alteração feita por: João V.")
 indice = 10
 adicao = 0
 digito_1 = 0
