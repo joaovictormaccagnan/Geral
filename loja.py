@@ -6,11 +6,17 @@ class Lanchonete:
     def __init__(self):
 
         self.cardapio = {
-            '1': {'nome': 'Sushi', 'preco': 25},
-            '2': {'nome': 'Temaki', 'preco': 18},
-            '3': {'nome': 'Yakisoba', 'preco': 22},
-            '4': {'nome': 'Hot Roll', 'preco': 28},
-            '5': {'nome': 'Suco Natural', 'preco': 8}
+            '1': {'nome': 'Salgados', 'preco': 6},
+            '2': {'nome': 'Pão de queijo', 'preco': 5},
+            '3': {'nome': 'Batata chips', 'preco': 3},
+            '4': {'nome': 'Paçoca grande', 'preco': 3},
+            '5': {'nome': 'Paçoca pequena', 'preco': 2},
+            '6': {'nome': 'Gomet', 'preco': 3},
+            '7': {'nome': 'Moranguete', 'preco': 2},
+            '8': {'nome': 'Suco (Garrafa)', 'preco': 3},
+            '9': {'nome': 'Suco (Copo)', 'preco': 1},
+            '10': {'nome': 'Chips', 'preco': 3},
+            '11': {'nome': 'Pipoca doce', 'preco': 4},
         }
 
         self.pedido = []
@@ -32,7 +38,7 @@ class Lanchonete:
 
     def mostrar_cardapio(self):
 
-        print("\n🍣 CARDÁPIO")
+        print("\n🍔 CARDÁPIO")
 
         for codigo, produto in self.cardapio.items():
 
@@ -45,7 +51,7 @@ class Lanchonete:
 
     def executar(self):
 
-        print("🍣 YAMASAKI'S")
+        print("🍔 MASONIZ")
 
         while True:
 
