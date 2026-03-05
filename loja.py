@@ -17,6 +17,9 @@ class Lanchonete:
             '9': {'nome': 'Suco (Copo)', 'preco': 1},
             '10': {'nome': 'Chips', 'preco': 3},
             '11': {'nome': 'Pipoca doce', 'preco': 4},
+            '12': {'nome': 'Tabonzinho', 'preco': 2.50},
+            '13': {'nome': 'Biscoito', 'preco': 3},
+            '14': {'nome': 'Toddynho', 'preco': 3},
         }
 
         self.pedido = []
