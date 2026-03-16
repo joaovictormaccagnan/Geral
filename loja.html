@@ -136,6 +136,7 @@
         .menu-item {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             padding: 1rem 0;
             border-bottom: 1px solid #eee;
             transition: all 0.3s;
@@ -154,12 +155,33 @@
         .item-name {
             font-size: 1.1rem;
             font-weight: 500;
+            flex-grow: 1;
         }
 
         .item-price {
             font-size: 1.2rem;
             font-weight: bold;
             color: #8B4513;
+            margin-right: 1rem;
+        }
+
+        .add-to-cart-btn {
+            margin-left: 10px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: none;
+            background: #8B4513;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .add-to-cart-btn:hover {
+            background: #D2B48C;
+            color: #8B4513;
+            transform: scale(1.05);
         }
 
         .cart-section {
@@ -188,6 +210,34 @@
             box-shadow: 0 10px 20px rgba(139,69,19,0.3);
         }
 
+        #carrinho {
+            margin-top: 2rem;
+        }
+
+        #cart-items div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f5f0;
+            border-radius: 10px;
+        }
+
+        #cart-items button {
+            padding: 5px 12px;
+            border-radius: 15px;
+            border: none;
+            background: #8B4513;
+            color: white;
+            cursor: pointer;
+        }
+
+        #cart-items button:hover {
+            background: #D2B48C;
+            color: #8B4513;
+        }
+
         footer {
             background: #8B4513;
             color: white;
@@ -203,6 +253,14 @@
             .menu-grid {
                 grid-template-columns: 1fr;
             }
+            .menu-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .item-price {
+                margin-right: 0;
+                margin-bottom: 0.5rem;
+            }
         }
     </style>
 </head>
@@ -217,7 +275,7 @@
     <section class="hero">
         <div class="hero-content">
             <h1>Bem-vindo à Maison Café</h1>
-            <p>Uma pausa francesa no coração de São Paulo</p>
+            <p>Uma pausa francesa no coração de Maringa</p>
         </div>
     </section>
 
@@ -233,34 +291,42 @@
                 <div class="menu-item">
                     <span class="item-name">Café expresso</span>
                     <span class="item-price">R$ 5,00</span>
+                    <button class="add-to-cart-btn" data-name="Café expresso" data-price="5.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Café com leite</span>
                     <span class="item-price">R$ 6,00</span>
+                    <button class="add-to-cart-btn" data-name="Café com leite" data-price="6.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Cappuccino</span>
                     <span class="item-price">R$ 8,00</span>
+                    <button class="add-to-cart-btn" data-name="Cappuccino" data-price="8.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Chocolate quente</span>
                     <span class="item-price">R$ 7,00</span>
+                    <button class="add-to-cart-btn" data-name="Chocolate quente" data-price="7.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Chá</span>
                     <span class="item-price">R$ 4,00</span>
+                    <button class="add-to-cart-btn" data-name="Chá" data-price="4.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Suco natural</span>
                     <span class="item-price">R$ 7,00</span>
+                    <button class="add-to-cart-btn" data-name="Suco natural" data-price="7.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Milkshake</span>
                     <span class="item-price">R$ 10,00</span>
+                    <button class="add-to-cart-btn" data-name="Milkshake" data-price="10.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Café gelado</span>
                     <span class="item-price">R$ 9,00</span>
+                    <button class="add-to-cart-btn" data-name="Café gelado" data-price="9.00">Adicionar</button>
                 </div>
             </div>
 
@@ -269,22 +335,27 @@
                 <div class="menu-item">
                     <span class="item-name">Croissant</span>
                     <span class="item-price">R$ 8,00</span>
+                    <button class="add-to-cart-btn" data-name="Croissant" data-price="8.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Pain au chocolat</span>
                     <span class="item-price">R$ 9,00</span>
+                    <button class="add-to-cart-btn" data-name="Pain au chocolat" data-price="9.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Baguette com queijo e presunto</span>
                     <span class="item-price">R$ 10,00</span>
+                    <button class="add-to-cart-btn" data-name="Baguette com queijo e presunto" data-price="10.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Quiche</span>
                     <span class="item-price">R$ 12,00</span>
+                    <button class="add-to-cart-btn" data-name="Quiche" data-price="12.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Crêpe (doce ou salgado)</span>
                     <span class="item-price">R$ 11,00</span>
+                    <button class="add-to-cart-btn" data-name="Crêpe (doce ou salgado)" data-price="11.00">Adicionar</button>
                 </div>
             </div>
 
@@ -293,22 +364,27 @@
                 <div class="menu-item">
                     <span class="item-name">Macaron</span>
                     <span class="item-price">R$ 6,00</span>
+                    <button class="add-to-cart-btn" data-name="Macaron" data-price="6.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Madeleine</span>
                     <span class="item-price">R$ 7,00</span>
+                    <button class="add-to-cart-btn" data-name="Madeleine" data-price="7.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Éclair</span>
                     <span class="item-price">R$ 9,00</span>
+                    <button class="add-to-cart-btn" data-name="Éclair" data-price="9.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Brownie</span>
                     <span class="item-price">R$ 7,00</span>
+                    <button class="add-to-cart-btn" data-name="Brownie" data-price="7.00">Adicionar</button>
                 </div>
                 <div class="menu-item">
                     <span class="item-name">Cookie</span>
                     <span class="item-price">R$ 5,00</span>
+                    <button class="add-to-cart-btn" data-name="Cookie" data-price="5.00">Adicionar</button>
                 </div>
             </div>
         </div>
@@ -318,6 +394,22 @@
             <button class="cart-btn" onclick="verCarrinho()">Ver Carrinho</button>
             <button class="cart-btn" onclick="fazerPedido()">Fazer Pedido</button>
         </section>
+
+        <!-- SEÇÃO DO CARRINHO -->
+        <section id="carrinho" class="cart-section" style="display:none;">
+            <h3 style="color:#8B4513; margin-bottom:1rem;">Seu Carrinho</h3>
+            <div id="cart-items"></div>
+            <p style="margin-top:1rem; font-size:1.2rem;">
+                Total: R$ <span id="cart-total">0.00</span>
+            </p>
+            <h4 style="color:#8B4513; margin:1.5rem 0 0.5rem;">Método de pagamento</h4>
+            <div style="margin-bottom:1.5rem; text-align:left; display:inline-block;">
+                <label style="display:block; margin:5px 0;"><input type="radio" name="pagamento" value="cartao" checked> Cartão de crédito</label>
+                <label style="display:block; margin:5px 0;"><input type="radio" name="pagamento" value="pix"> Pix</label>
+                <label style="display:block; margin:5px 0;"><input type="radio" name="pagamento" value="bitcoin"> Bitcoin</label>
+            </div>
+            <button class="cart-btn" onclick="finalizarCompra()" style="padding:20px 50px; font-size:1.3rem;">Finalizar Compra</button>
+        </section>
     </div>
 
     <footer>
@@ -325,19 +417,119 @@
     </footer>
 
     <script>
-        function logout() {
-            if(confirm('Deseja realmente sair?')) {
-                window.location.href = 'login.html';
-            }
-        }
+// exige login
+const usuarioLogado = sessionStorage.getItem("usuarioLogado");
+if (!usuarioLogado) {
+    alert("Você precisa fazer login primeiro.");
+    window.location.href = "login.html";
+}
 
-        function verCarrinho() {
-            alert('Carrinho em desenvolvimento! 😊');
-        }
+let carrinho = [];
 
-        function fazerPedido() {
-            alert('Em breve você poderá fazer pedidos online!');
+// adicionar ao carrinho
+document.querySelectorAll(".add-to-cart-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+        const nome = btn.getAttribute("data-name");
+        const preco = parseFloat(btn.getAttribute("data-price"));
+
+        const existente = carrinho.find(item => item.nome === nome);
+        if (existente) {
+            existente.qtd += 1;
+        } else {
+            carrinho.push({ nome, preco, qtd: 1 });
         }
-    </script>
+        atualizarCarrinhoVisual();
+    });
+});
+
+function atualizarCarrinhoVisual() {
+    const container = document.getElementById("cart-items");
+    const totalSpan = document.getElementById("cart-total");
+
+    container.innerHTML = "";
+    let total = 0;
+
+    carrinho.forEach((item, index) => {
+        const subtotal = item.preco * item.qtd;
+        total += subtotal;
+
+        const div = document.createElement("div");
+        div.innerHTML = `
+            <span>${item.nome} (x${item.qtd}) - R$ ${subtotal.toFixed(2)}</span>
+            <button onclick="removerItem(${index})">Remover</button>
+        `;
+        container.appendChild(div);
+    });
+
+    totalSpan.textContent = total.toFixed(2);
+}
+
+function removerItem(index) {
+    carrinho.splice(index, 1);
+    atualizarCarrinhoVisual();
+}
+
+function verCarrinho() {
+    document.getElementById("carrinho").style.display = "block";
+}
+
+function fazerPedido() {
+    verCarrinho();
+}
+
+function finalizarCompra() {
+    if (carrinho.length === 0) {
+        alert("Seu carrinho está vazio!");
+        return;
+    }
+
+    const pagamento = document.querySelector('input[name="pagamento"]:checked').value;
+
+    const payload = {
+        usuario: usuarioLogado,
+        pagamento: pagamento,
+        itens: carrinho.map(item => ({
+            nome: item.nome,
+            preco: item.preco,
+            qtd: item.qtd
+        }))
+    };
+
+    fetch("http://127.0.0.1:8000/salvar_pedido", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error("HTTP " + res.status);
+        }
+        return res.json();
+    })
+    .then(data => {
+        if (data.sucesso) {
+            alert("Pedido realizado com sucesso!");
+            carrinho = [];
+            atualizarCarrinhoVisual();
+            document.getElementById("carrinho").style.display = "none";
+        } else {
+            alert("Erro ao salvar pedido: " + data.mensagem);
+        }
+    })
+    .catch(err => {
+        alert("Erro de conexão! (" + err.message + ")");
+        console.error("Erro completo:", err);
+    });
+}
+
+
+function logout() {
+    sessionStorage.removeItem("usuarioLogado");
+    window.location.href = "login.html";
+}
+</script>
+
+
+
 </body>
 </html>

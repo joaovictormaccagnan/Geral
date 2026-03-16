@@ -86,30 +86,47 @@
     
     <p id="msg"></p>
     
-    <script>
-        document.getElementById("entrarButton").addEventListener("click", function(e){
-            e.preventDefault();
-            window.location.href = "loja.html";
-        });
+<script>
+document.getElementById("loginForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    
+    const usuario = document.getElementById("usuario").value;
+    const senha = document.getElementById("senha").value;
+    
+    fetch("http://127.0.0.1:8000/login", {
+        method: "POST",
+        headers: { 
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: `usuario=${encodeURIComponent(usuario)}&senha=${encodeURIComponent(senha)}`
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error("HTTP " + res.status);
+        }
+        return res.json();
+    })
+    .then(data => {
+        document.getElementById("msg").innerText = data.message;
+        document.getElementById("msg").style.color = data.sucesso ? "green" : "red";
+        
+        if (data.sucesso) {
+            sessionStorage.setItem("usuarioLogado", usuario);
+            setTimeout(() => {
+                window.location.href = "loja.html";
+            }, 1000);
+        }
+    })
+    .catch(err => {
+        document.getElementById("msg").innerText = "Erro de conexão! (" + err.message + ")";
+        document.getElementById("msg").style.color = "red";
+        console.error("Erro no login:", err);
+    });
+});
+</script>
 
-        document.getElementById("loginForm").addEventListener("submit", function(e){
-            e.preventDefault();
-            
-            fetch("http://localhost:5000/login",{
-                method:"POST",
-                headers:{
-                    "Content-Type":"application/json"
-                },
-                body:JSON.stringify({
-                    usuario:document.getElementById("usuario").value,
-                    senha:document.getElementById("senha").value
-                })
-            })
-            .then(res=>res.json())
-            .then(data=>{
-                document.getElementById("msg").innerText=data.message;
-            })
-        })
-    </script>
+
+
+
 </body>
 </html>

@@ -5,7 +5,6 @@ for p in range(9):
     nove_digitos += str(random.randint(0, 9))
 
 
-
 indice = 10
 adicao = 0
 digito_1 = 0

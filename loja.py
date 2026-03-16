@@ -6,20 +6,24 @@ class Lanchonete:
     def __init__(self):
 
         self.cardapio = {
-            '1': {'nome': 'Salgados', 'preco': 6},
-            '2': {'nome': 'Pão de queijo', 'preco': 5},
-            '3': {'nome': 'Batata chips', 'preco': 3},
-            '4': {'nome': 'Paçoca grande', 'preco': 3},
-            '5': {'nome': 'Paçoca pequena', 'preco': 2},
-            '6': {'nome': 'Gomet', 'preco': 3},
-            '7': {'nome': 'Moranguete', 'preco': 2},
-            '8': {'nome': 'Suco (Garrafa)', 'preco': 3},
-            '9': {'nome': 'Suco (Copo)', 'preco': 1},
-            '10': {'nome': 'Chips', 'preco': 3},
-            '11': {'nome': 'Pipoca doce', 'preco': 4},
-            '12': {'nome': 'Tabonzinho', 'preco': 2.50},
-            '13': {'nome': 'Biscoito', 'preco': 3},
-            '14': {'nome': 'Toddynho', 'preco': 3},
+            '1': {'nome': 'Croissant', 'preco': 8},
+            '2': {'nome': 'Pain au chocolat', 'preco': 9},
+            '3': {'nome': 'Baguette com queijo e presunto', 'preco': 10},
+            '4': {'nome': 'Quiche', 'preco': 12},
+            '5': {'nome': 'Crêpe (doce ou salgado)', 'preco': 11},
+            '6': {'nome': 'Café expresso', 'preco': 5},
+            '7': {'nome': 'Café com leite', 'preco': 6},
+            '8': {'nome': 'Cappuccino', 'preco': 8},
+            '9': {'nome': 'Chocolate quente', 'preco': 7},
+            '10': {'nome': 'Chá', 'preco': 4},
+            '11': {'nome': 'Suco natural', 'preco': 7},
+            '12': {'nome': 'Milkshake', 'preco': 10},
+            '13': {'nome': 'Café gelado', 'preco': 9},
+            '14': {'nome': 'Macaron', 'preco': 6},
+            '15': {'nome': 'Madeleine', 'preco': 7},
+            '16': {'nome': 'Èclair', 'preco': 9},
+            '17': {'nome': 'Brownie', 'preco': 7},
+            '18': {'nome': 'Cookie', 'preco': 5},
         }
 
         self.pedido = []
@@ -41,7 +45,7 @@ class Lanchonete:
 
     def mostrar_cardapio(self):
 
-        print("\n🍔 CARDÁPIO")
+        print("\n☕ CARDÁPIO")
 
         for codigo, produto in self.cardapio.items():
 
@@ -100,6 +104,7 @@ class Lanchonete:
             self.enviar_para_api(produto, pagamento)
 
         print("✅ Pedido enviado para o sistema!")
+        print("Obrigado por comprar na MASONIZ!")
 
 
 if __name__ == "__main__":

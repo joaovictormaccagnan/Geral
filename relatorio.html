@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório de Pedidos - Maison Café</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Georgia', serif; 
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh; 
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { 
+            text-align: center; 
+            background: linear-gradient(45deg, #8B4513, #D2B48C);
+            color: white; padding: 2rem; border-radius: 15px; margin-bottom: 2rem;
+        }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .stats { display: flex; justify-content: center; gap: 2rem; margin-top: 1rem; }
+        .stat { background: rgba(255,255,255,0.2); padding: 1rem 2rem; border-radius: 10px; }
+        table { 
+            width: 100%; background: white; border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden;
+        }
+        th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: linear-gradient(45deg, #D2B48C, #8B4513); color: white; font-weight: bold; }
+        tr:hover { background: #f9f5f0; }
+        .total { font-weight: bold; color: #8B4513; font-size: 1.2rem; }
+        .itens { background: #f0f8f0; padding: 0.5rem; border-radius: 5px; font-size: 0.9rem; }
+        .btn { 
+            background: linear-gradient(45deg, #D2B48C, #8B4513); 
+            color: white; border: none; padding: 10px 20px; 
+            border-radius: 25px; cursor: pointer; font-weight: bold;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        @media (max-width: 768px) { 
+            .stats { flex-direction: column; gap: 1rem; }
+            table { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Relatório de Pedidos</h1>
+            <p>Maisson Café - Todos os pedidos</p>
+            <div class="stats">
+                <div class="stat">
+                    <div style="font-size: 2rem;">{{ total_pedidos }}</div>
+                    <div>Total de Pedidos</div>
+                </div>
+                <div class="stat">
+                    <div style="font-size: 2rem;">R$ {{ total_geral | round(2) }}</div>
+                    <div>Faturamento Total</div>
+                </div>
+            </div>
+            <button class="btn" onclick="window.location.reload()">🔄 Atualizar</button>
+            <button class="btn" style="background: linear-gradient(45deg, #ff4444, #cc0000);" onclick="limparPedidos()">🧹 Limpar Todos</button>
+            <button class="btn" onclick="window.location.href='/loja.html'">🛒 Nova Venda</button>
+        </header>
+
+        <table id="tabelaPedidos">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Usuário</th>
+                    <th>Itens</th>
+                    <th>Pagamento</th>
+                    <th>Total</th>
+                    <th>Data/Hora</th>
+                </tr>
+            </thead>
+            <tbody id="listaPedidos">
+                <!-- Carregado via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        async function carregarPedidos() {
+            try {
+                const res = await fetch('http://127.0.0.1:8000/pedidos');
+                const data = await res.json();
+                
+                const tbody = document.getElementById('listaPedidos');
+                let totalGeral = 0;
+                let totalPedidos = data.pedidos.length;
+                
+                data.pedidos.forEach(pedido => {
+                    const itens = JSON.parse(pedido.itens);
+                    const itensHtml = itens.map(item => `${item.nome} (x${item.qtd})`).join(', ');
+                    totalGeral += pedido.total;
+                    
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${pedido.id}</td>
+                            <td>${pedido.usuario}</td>
+                            <td class="itens">${itensHtml}</td>
+                            <td>${pedido.pagamento.toUpperCase()}</td>
+                            <td class="total">R$ ${pedido.total.toFixed(2)}</td>
+                            <td>${new Date(pedido.criado_em).toLocaleString('pt-BR')}</td>
+                        </tr>
+                    `;
+                });
+                
+                // Atualiza stats
+                document.querySelector('.stat div:nth-child(1)').textContent = totalPedidos;
+                document.querySelector('.stat:nth-child(2) div:nth-child(1)').textContent = `R$ ${totalGeral.toFixed(2)}`;
+                
+            } catch (err) {
+                console.error('Erro:', err);
+                document.getElementById('listaPedidos').innerHTML = '<tr><td colspan="6">Erro ao carregar pedidos</td></tr>';
+            }
+        }
+        
+        carregarPedidos();
+        setInterval(carregarPedidos, 10000); // Atualiza a cada 10s
+        async function limparPedidos() {
+    if (confirm('Tem certeza? Isso vai APAGAR TODOS os pedidos!')) {
+        try {
+            const res = await fetch('http://127.0.0.1:8000/limpar_pedidos', { method: 'DELETE' });
+            const data = await res.json();
+            alert(data.mensagem);
+            carregarPedidos(); // recarrega a tabela
+        } catch (err) {
+            alert('Erro ao limpar pedidos!');
+        }
+    }
+}
+
+    </script>
+</body>
+</html>
