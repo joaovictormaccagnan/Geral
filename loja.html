@@ -424,6 +424,13 @@ if (!usuarioLogado) {
     window.location.href = "login.html";
 }
 
+// Se for ADMIN, redireciona para o relatório
+const tipoLogin = sessionStorage.getItem("tipoLogin");
+if (tipoLogin === "admin") {
+    alert("👨‍💼 Admin detectado! Redirecionando para o relatório...");
+    window.location.href = "relatorio.html";
+}
+
 let carrinho = [];
 
 // adicionar ao carrinho
@@ -525,6 +532,7 @@ function finalizarCompra() {
 
 function logout() {
     sessionStorage.removeItem("usuarioLogado");
+    sessionStorage.removeItem("tipoLogin");
     window.location.href = "login.html";
 }
 </script>

@@ -12,26 +12,50 @@
         background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         font-family: Arial, sans-serif;
     }
-    h2 {
-        font-family: 'Georgia', serif;
-        font-size: 28px;
-        text-transform: uppercase;
-        display: flex;
-        justify-content: center;
-        color: #8B4513;
-        margin-bottom: 20px;
-    }
-    form {
-        display: flex;
-        flex-direction: column;
-        width: 350px;
+    .container {
+        width: 400px;
         border: 2px solid #D2B48C;
-        padding: 30px;
         border-radius: 10px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        justify-content: center;
-        margin: 0 auto;
         background: white;
+        overflow: hidden;
+    }
+    .tabs {
+        display: flex;
+        background: linear-gradient(45deg, #8B4513, #D2B48C);
+    }
+    .tab-btn {
+        flex: 1;
+        padding: 15px;
+        border: none;
+        background: transparent;
+        color: white;
+        font-weight: bold;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+    }
+    .tab-btn.active {
+        background: rgba(255,255,255,0.3);
+        border-bottom: 3px solid white;
+    }
+    .tab-btn:hover {
+        background: rgba(255,255,255,0.2);
+    }
+    .tab-content {
+        padding: 30px;
+        display: none;
+    }
+    .tab-content.active {
+        display: block;
+    }
+    h2 {
+        font-family: 'Georgia', serif;
+        font-size: 24px;
+        color: #8B4513;
+        text-align: center;
+        margin-bottom: 20px;
     }
     label {
         font-family: Arial, sans-serif;
@@ -39,15 +63,19 @@
         margin-bottom: 5px;
         color: #555;
         font-weight: bold;
+        display: block;
     } 
     input {
+        width: 100%;
         padding: 12px;
         border: 1px solid #D2B48C;
         border-radius: 5px;
         font-size: 16px;
         margin-bottom: 15px;
+        box-sizing: border-box;
     }
     button {
+        width: 100%;
         margin-top: 20px;
         padding: 12px;
         background: linear-gradient(45deg, #D2B48C, #8B4513);
@@ -63,66 +91,140 @@
         background: linear-gradient(45deg, #8B4513, #D2B48C);
         transform: translateY(-2px);
     }
-    #msg {
+    .msg {
         text-align: center;
         margin-top: 15px;
         font-weight: bold;
-        color: #8B4513;
+        padding: 10px;
+        border-radius: 5px;
+        display: none;
+    }
+    .msg.show {
+        display: block;
+    }
+    .msg.success {
+        background: #d4edda;
+        color: #155724;
+    }
+    .msg.error {
+        background: #f8d7da;
+        color: #721c24;
     }
 </style>
 </head>
 <body>
-    <form id="loginForm">
-        <h2>Login</h2>
-        
-        <label>Usuário:</label>
-        <input type="text" id="usuario" required>
-        
-        <label>Senha:</label>
-        <input type="password" id="senha" required>
-        
-        <button id="entrarButton" type="submit">Entrar</button>
-    </form>
-    
-    <p id="msg"></p>
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="mudarAba('admin')">👨‍💼 Admin</button>
+            <button class="tab-btn" onclick="mudarAba('usuario')">👤 Usuário</button>
+        </div>
+
+        <!-- ABA ADMIN -->
+        <div id="admin" class="tab-content active">
+            <h2>Login Admin</h2>
+            <form id="adminForm" onsubmit="loginAdmin(event)">
+                <label>Usuário:</label>
+                <input type="text" id="admin_user" required value="admin">
+                
+                <label>Senha:</label>
+                <input type="password" id="admin_pass" required value="senha123">
+                
+                <button type="submit">Entrar como Admin</button>
+            </form>
+            <p id="msg_admin" class="msg"></p>
+        </div>
+
+        <!-- ABA USUÁRIO -->
+        <div id="usuario" class="tab-content">
+            <h2>Login Usuário</h2>
+            <form id="usuarioForm" onsubmit="loginUsuario(event)">
+                <label>Usuário (qualquer um):</label>
+                <input type="text" id="user_user" required placeholder="Ex: João">
+                
+                <label>Senha (qualquer uma):</label>
+                <input type="password" id="user_pass" required placeholder="Ex: 1234">
+                
+                <button type="submit">Entrar como Usuário</button>
+            </form>
+            <p id="msg_usuario" class="msg"></p>
+        </div>
+    </div>
     
 <script>
-document.getElementById("loginForm").addEventListener("submit", function(e){
-    e.preventDefault();
-    
-    const usuario = document.getElementById("usuario").value;
-    const senha = document.getElementById("senha").value;
-    
-    fetch("http://127.0.0.1:8000/login", {
-        method: "POST",
-        headers: { 
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: `usuario=${encodeURIComponent(usuario)}&senha=${encodeURIComponent(senha)}`
-    })
-    .then(res => {
-        if (!res.ok) {
-            throw new Error("HTTP " + res.status);
-        }
-        return res.json();
-    })
-    .then(data => {
-        document.getElementById("msg").innerText = data.message;
-        document.getElementById("msg").style.color = data.sucesso ? "green" : "red";
+    function mudarAba(aba) {
+        // Esconde todos os tabs
+        document.getElementById('admin').classList.remove('active');
+        document.getElementById('usuario').classList.remove('active');
         
-        if (data.sucesso) {
-            sessionStorage.setItem("usuarioLogado", usuario);
-            setTimeout(() => {
-                window.location.href = "loja.html";
-            }, 1000);
+        // Remove active de todos os botões
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        
+        // Mostra a aba selecionada
+        document.getElementById(aba).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    function mostrarMensagem(elementoId, mensagem, sucesso) {
+        const elemento = document.getElementById(elementoId);
+        elemento.innerText = mensagem;
+        elemento.classList.add('show');
+        elemento.classList.toggle('success', sucesso);
+        elemento.classList.toggle('error', !sucesso);
+    }
+
+    async function loginAdmin(e) {
+        e.preventDefault();
+        const usuario = document.getElementById('admin_user').value;
+        const senha = document.getElementById('admin_pass').value;
+        
+        try {
+            const res = await fetch('http://127.0.0.1:8000/login_admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `usuario=${encodeURIComponent(usuario)}&senha=${encodeURIComponent(senha)}`
+            });
+            
+            const data = await res.json();
+            
+            if (data.sucesso) {
+                mostrarMensagem('msg_admin', data.message, true);
+                sessionStorage.setItem('usuarioLogado', usuario);
+                sessionStorage.setItem('tipoLogin', 'admin');
+                setTimeout(() => window.location.href = 'relatorio.html', 1000);
+            } else {
+                mostrarMensagem('msg_admin', data.message, false);
+            }
+        } catch (err) {
+            mostrarMensagem('msg_admin', 'Erro de conexão!', false);
         }
-    })
-    .catch(err => {
-        document.getElementById("msg").innerText = "Erro de conexão! (" + err.message + ")";
-        document.getElementById("msg").style.color = "red";
-        console.error("Erro no login:", err);
-    });
-});
+    }
+
+    async function loginUsuario(e) {
+        e.preventDefault();
+        const usuario = document.getElementById('user_user').value;
+        const senha = document.getElementById('user_pass').value;
+        
+        try {
+            const res = await fetch('http://127.0.0.1:8000/login_usuario', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `usuario=${encodeURIComponent(usuario)}&senha=${encodeURIComponent(senha)}`
+            });
+            
+            const data = await res.json();
+            
+            if (data.sucesso) {
+                mostrarMensagem('msg_usuario', data.message, true);
+                sessionStorage.setItem('usuarioLogado', usuario);
+                sessionStorage.setItem('tipoLogin', 'usuario');
+                setTimeout(() => window.location.href = 'loja.html', 1000);
+            } else {
+                mostrarMensagem('msg_usuario', data.message, false);
+            }
+        } catch (err) {
+            mostrarMensagem('msg_usuario', 'Erro de conexão!', false);
+        }
+    }
 </script>
 
 
