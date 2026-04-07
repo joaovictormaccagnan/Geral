@@ -1,6 +1,6 @@
--- ============================================
--- 🚀 Maison Café - Script SQL
--- ============================================
+
+-- Maison Café 
+
 -- Cria o banco de dados e as tabelas necessárias
 
 -- Criar banco de dados se não existir
@@ -46,6 +46,5 @@ CREATE INDEX idx_usuario ON usuarios(usuario);
 CREATE INDEX idx_pedidos_usuario ON pedidos(usuario);
 CREATE INDEX idx_pedidos_data ON pedidos(criado_em);
 
--- ============================================
--- ✅ Script finalizado com sucesso!
--- ============================================
+-- Script finalizado!
+

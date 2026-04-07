@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.responses import HTMLResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 import mysql.connector
 import bcrypt
@@ -13,6 +13,14 @@ def get_db_connection():
         host='localhost', user='root', password='', database='maison_cafe'
     )
 
+# Função para retornar arquivo sem cache
+def get_file_no_cache(file_path: str):
+    response = FileResponse(file_path)
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 # API ENDPOINTS (SEMPRE PRIMEIRO)
 @app.post("/login_admin")
 async def login_admin(usuario: str = Form(...), senha: str = Form(...)):
@@ -25,10 +33,39 @@ async def login_admin(usuario: str = Form(...), senha: str = Form(...)):
 @app.post("/login_usuario")
 async def login_usuario(usuario: str = Form(...), senha: str = Form(...)):
     print(f"👥 LOGIN USUÁRIO: usuario={usuario}")
-    if usuario and senha:  # Aceita qualquer usuário e senha
-        print("✅ LOGIN USUÁRIO OK!")
-        return {"sucesso": True, "tipo": "usuario", "usuario": usuario, "message": f"✅ Bem-vindo(a), {usuario}!"}
-    return {"sucesso": False, "message": "❌ Usuário ou senha inválidos!"}
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Verificar se o usuário existe no banco
+        cursor.execute("SELECT usuario, senha FROM usuarios WHERE usuario = %s", (usuario,))
+        result = cursor.fetchone()
+        
+        if result is None:
+            print(f"❌ USUÁRIO NÃO ENCONTRADO: {usuario}")
+            return {"sucesso": False, "message": "❌ Usuário não encontrado! Registre-se primeiro."}
+        
+        usuario_db, senha_hash = result
+        
+        # Verificar senha
+        if bcrypt.checkpw(senha.encode('utf-8'), senha_hash.encode('utf-8')):
+            # Registrar login na tabela de logins
+            cursor.execute(
+                "INSERT INTO logins (usuario) VALUES (%s)",
+                (usuario,)
+            )
+            conn.commit()
+            print("✅ LOGIN USUÁRIO OK!")
+            return {"sucesso": True, "tipo": "usuario", "usuario": usuario, "message": f"✅ Bem-vindo(a), {usuario}!"}
+        else:
+            print(f"❌ SENHA INCORRETA: {usuario}")
+            return {"sucesso": False, "message": "❌ Senha incorreta!"}
+    except Exception as e:
+        print(f"❌ ERRO LOGIN USUARIO: {e}")
+        return {"sucesso": False, "message": f"❌ Erro: {str(e)}"}
+    finally:
+        if conn: conn.close()
 
 @app.post("/login")
 async def login(usuario: str = Form(...), senha: str = Form(...)):
@@ -51,8 +88,8 @@ async def login(usuario: str = Form(...), senha: str = Form(...)):
         if conn: conn.close()
 
 @app.post("/registro")
-async def registro(usuario: str = Form(...), senha: str = Form(...), email: str = Form(...)):
-    print(f"📝 REGISTRO: usuario={usuario}, email={email}")
+async def registro(usuario: str = Form(...), senha: str = Form(...)):
+    print(f"📝 REGISTRO: usuario={usuario}")
     conn = None
     try:
         # Criptografar senha
@@ -61,8 +98,8 @@ async def registro(usuario: str = Form(...), senha: str = Form(...), email: str 
         conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute(
-            "INSERT INTO usuarios (usuario, senha, email) VALUES (%s, %s, %s)",
-            (usuario, senha_hash, email)
+            "INSERT INTO usuarios (usuario, senha) VALUES (%s, %s)",  # ← CORRIGIDO: 2 %s
+            (usuario, senha_hash)                                      # ← 2 parâmetros
         )
         conn.commit()
         print("✅ USUÁRIO CADASTRADO!")
@@ -150,6 +187,103 @@ async def limpar_pedidos():
     finally:
         if conn: conn.close()
 
+# ENDPOINTS DE CARDÁPIO (ADMIN)
+@app.get("/cardapio")
+async def listar_cardapio():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM cardapio ORDER BY categoria, nome")
+        itens = cursor.fetchall()
+        return {"sucesso": True, "itens": itens}
+    except Exception as e:
+        print(f"❌ ERRO: {e}")
+        return {"sucesso": False, "itens": []}
+    finally:
+        if conn: conn.close()
+
+@app.post("/cardapio")
+async def adicionar_cardapio(categoria: str = Form(...), nome: str = Form(...), preco: float = Form(...)):
+    print(f"➕ ADICIONANDO ITEM: {nome} - R$ {preco}")
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO cardapio (categoria, nome, preco) VALUES (%s, %s, %s)",
+            (categoria, nome, preco)
+        )
+        conn.commit()
+        print("✅ ITEM ADICIONADO!")
+        return {"sucesso": True, "message": "✅ Item adicionado com sucesso!"}
+    except Exception as e:
+        print(f"❌ ERRO: {e}")
+        return {"sucesso": False, "message": f"❌ Erro: {str(e)}"}
+    finally:
+        if conn: conn.close()
+
+@app.put("/cardapio/{item_id}")
+async def atualizar_cardapio(item_id: int, nome: str = Form(...), preco: float = Form(...)):
+    print(f"✏️ ATUALIZANDO ITEM {item_id}: {nome} - R$ {preco}")
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE cardapio SET nome = %s, preco = %s WHERE id = %s",
+            (nome, preco, item_id)
+        )
+        conn.commit()
+        if cursor.rowcount > 0:
+            print("✅ ITEM ATUALIZADO!")
+            return {"sucesso": True, "message": "✅ Item atualizado com sucesso!"}
+        return {"sucesso": False, "message": "❌ Item não encontrado!"}
+    except Exception as e:
+        print(f"❌ ERRO: {e}")
+        return {"sucesso": False, "message": f"❌ Erro: {str(e)}"}
+    finally:
+        if conn: conn.close()
+
+@app.delete("/cardapio/{item_id}")
+async def deletar_cardapio(item_id: int):
+    print(f"🗑️ DELETANDO ITEM: id={item_id}")
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM cardapio WHERE id = %s", (item_id,))
+        conn.commit()
+        if cursor.rowcount > 0:
+            print("✅ ITEM DELETADO!")
+            return {"sucesso": True, "message": "✅ Item deletado com sucesso!"}
+        return {"sucesso": False, "message": "❌ Item não encontrado!"}
+    except Exception as e:
+        print(f"❌ ERRO: {e}")
+        return {"sucesso": False, "message": f"❌ Erro: {str(e)}"}
+    finally:
+        if conn: conn.close()
+
+@app.get("/usuarios_login")
+async def listar_usuarios_login():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT DISTINCT usuario, COUNT(*) as total_logins, MAX(data_login) as ultimo_login
+            FROM logins
+            GROUP BY usuario
+            ORDER BY ultimo_login DESC
+        """)
+        usuarios = cursor.fetchall()
+        return {"sucesso": True, "usuarios": usuarios}
+    except Exception as e:
+        print(f"❌ ERRO: {e}")
+        return {"sucesso": False, "usuarios": []}
+    finally:
+        if conn: conn.close()
+
 # PÁGINAS HTML (ANTES do StaticFiles)
 @app.get("/")
 async def home():
@@ -181,15 +315,19 @@ async def home():
 
 @app.get("/login.html")
 async def get_login():
-    return FileResponse("login.html")
+    return get_file_no_cache("login.html")
 
 @app.get("/loja.html")
 async def get_loja():
-    return FileResponse("loja.html")
+    return get_file_no_cache("loja.html")
+
+@app.get("/admin.html")
+async def get_admin():
+    return get_file_no_cache("admin.html")
 
 @app.get("/relatorio.html")
 async def get_relatorio():
-    return FileResponse("relatorio.html")
+    return get_file_no_cache("relatorio.html")
 
 # StaticFiles NO FINAL (só arquivos CSS/JS)
 app.mount("/static", StaticFiles(directory="."), name="static")

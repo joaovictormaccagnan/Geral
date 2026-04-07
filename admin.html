@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Maison Café</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(45deg, #8B4513, #D2B48C);
+            color: white;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-header {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid white;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .btn-header:hover {
+            background: white;
+            color: #8B4513;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid #D2B48C;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            color: #8B4513;
+            cursor: pointer;
+            font-weight: bold;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            border-bottom-color: #8B4513;
+            color: #8B4513;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        h2 {
+            color: #8B4513;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #8B4513;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #D2B48C;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: Arial, sans-serif;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #8B4513;
+            box-shadow: 0 0 5px rgba(139,69,19,0.3);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #D2B48C, #8B4513);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139,69,19,0.3);
+        }
+
+        .btn-deletar {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+        }
+
+        .btn-deletar:hover {
+            background: linear-gradient(45deg, #ff6666, #dd0000);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 2rem;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: linear-gradient(45deg, #D2B48C, #8B4513);
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #f9f5f0;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .msg {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .msg.show {
+            display: block;
+        }
+
+        .msg.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .msg.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .stat-box {
+            background: linear-gradient(45deg, #D2B48C, #8B4513);
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .stat-box h3 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-box p {
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">🍵 Maison Café - Admin</div>
+            <div class="nav-buttons">
+                <a href="relatorio.html" class="btn-header">📊 Relatório</a>
+                <button class="btn-header" onclick="logout()">🚪 Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="abrirAba('cardapio')">🍽️ Cardápio</button>
+            <button class="tab-btn" onclick="abrirAba('usuarios')">👥 Usuários</button>
+        </div>
+
+        <!-- ABA CARDÁPIO -->
+        <div id="cardapio" class="tab-content active">
+            <h2>Gerenciar Cardápio</h2>
+            
+            <div class="stat-box">
+                <h3 id="totalItens">0</h3>
+                <p>Itens no Cardápio</p>
+            </div>
+
+            <h3 style="color: #8B4513; margin-top: 2rem;">Adicionar Novo Item</h3>
+            <form onsubmit="adicionarItem(event)" style="max-width: 500px;">
+                <div class="form-group">
+                    <label>Categoria:</label>
+                    <select id="categoria" required>
+                        <option value="">Selecione uma categoria</option>
+                        <option value="Bebidas">☕ Bebidas</option>
+                        <option value="Comidas">🥐 Comidas</option>
+                        <option value="Doces">🍰 Doces</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Nome do Item:</label>
+                    <input type="text" id="nome" required placeholder="Ex: Café expresso">
+                </div>
+
+                <div class="form-group">
+                    <label>Preço (R$):</label>
+                    <input type="number" id="preco" step="0.01" min="0" required placeholder="Ex: 5.00">
+                </div>
+
+                <button type="submit" class="btn">➕ Adicionar Item</button>
+            </form>
+
+            <p id="msg-cardapio" class="msg"></p>
+
+            <h3 style="color: #8B4513; margin-top: 2rem;">Itens do Cardápio</h3>
+            <table id="tabelaCardapio">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Categoria</th>
+                        <th>Nome</th>
+                        <th>Preço</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="listaCardapio">
+                    <!-- Carregado via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ABA USUÁRIOS -->
+        <div id="usuarios" class="tab-content">
+            <h2>Usuários Registrados</h2>
+            
+            <div class="stat-box">
+                <h3 id="totalUsuarios">0</h3>
+                <p>Usuários com Login Registrado</p>
+            </div>
+
+            <table id="tabelaUsuarios">
+                <thead>
+                    <tr>
+                        <th>Usuário</th>
+                        <th>Total de Logins</th>
+                        <th>Último Login</th>
+                    </tr>
+                </thead>
+                <tbody id="listaUsuarios">
+                    <!-- Carregado via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // ✅ VERIFICAR SE É ADMIN
+        function verificarAdmin() {
+            const tipoLogin = sessionStorage.getItem('tipoLogin');
+            if (tipoLogin !== 'admin') {
+                alert('❌ Acesso negado! Apenas ADMIN pode acessar esta página.');
+                window.location.href = 'login.html';
+            }
+        }
+
+        verificarAdmin();
+
+        // Abrir aba
+        function abrirAba(aba) {
+            // Esconder todas as abas
+            document.getElementById('cardapio').classList.remove('active');
+            document.getElementById('usuarios').classList.remove('active');
+
+            // Remover active de todos os botões
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            // Mostrar aba selecionada
+            document.getElementById(aba).classList.add('active');
+            event.target.classList.add('active');
+
+            if (aba === 'usuarios') {
+                carregarUsuarios();
+            }
+        }
+
+        // Mostrar mensagem
+        function mostrarMensagem(elementoId, mensagem, sucesso) {
+            const elemento = document.getElementById(elementoId);
+            elemento.innerText = mensagem;
+            elemento.classList.add('show');
+            elemento.classList.toggle('success', sucesso);
+            elemento.classList.toggle('error', !sucesso);
+
+            setTimeout(() => {
+                elemento.classList.remove('show');
+            }, 3000);
+        }
+
+        // Carregar cardápio
+        async function carregarCardapio() {
+            try {
+                const res = await fetch('http://127.0.0.1:8000/cardapio');
+                const data = await res.json();
+
+                if (data.sucesso) {
+                    const tbody = document.getElementById('listaCardapio');
+                    tbody.innerHTML = '';
+
+                    data.itens.forEach(item => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${item.id}</td>
+                                <td>${item.categoria}</td>
+                                <td>${item.nome}</td>
+                                <td>R$ ${item.preco.toFixed(2)}</td>
+                                <td>
+                                    <div class="actions">
+                                        <button class="btn btn-small" onclick="editarItem(${item.id}, '${item.nome}', ${item.preco})">✏️ Editar</button>
+                                        <button class="btn btn-small btn-deletar" onclick="deletarItem(${item.id})">🗑️ Deletar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    document.getElementById('totalItens').textContent = data.itens.length;
+                }
+            } catch (err) {
+                console.error('Erro:', err);
+                mostrarMensagem('msg-cardapio', 'Erro ao carregar cardápio!', false);
+            }
+        }
+
+        // Adicionar item
+        async function adicionarItem(e) {
+            e.preventDefault();
+
+            const categoria = document.getElementById('categoria').value;
+            const nome = document.getElementById('nome').value;
+            const preco = document.getElementById('preco').value;
+
+            try {
+                const res = await fetch('http://127.0.0.1:8000/cardapio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `categoria=${encodeURIComponent(categoria)}&nome=${encodeURIComponent(nome)}&preco=${preco}`
+                });
+
+                const data = await res.json();
+
+                if (data.sucesso) {
+                    mostrarMensagem('msg-cardapio', data.message, true);
+                    document.getElementById('categoria').value = '';
+                    document.getElementById('nome').value = '';
+                    document.getElementById('preco').value = '';
+                    carregarCardapio();
+                } else {
+                    mostrarMensagem('msg-cardapio', data.message, false);
+                }
+            } catch (err) {
+                mostrarMensagem('msg-cardapio', 'Erro ao adicionar item!', false);
+            }
+        }
+
+        // Editar item
+        function editarItem(id, nome, preco) {
+            const novoNome = prompt('Novo nome:', nome);
+            if (novoNome === null) return;
+
+            const novoPreco = prompt('Novo preço:', preco);
+            if (novoPreco === null) return;
+
+            atualizarItem(id, novoNome, novoPreco);
+        }
+
+        // Atualizar item
+        async function atualizarItem(id, nome, preco) {
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/cardapio/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `nome=${encodeURIComponent(nome)}&preco=${preco}`
+                });
+
+                const data = await res.json();
+
+                if (data.sucesso) {
+                    mostrarMensagem('msg-cardapio', data.message, true);
+                    carregarCardapio();
+                } else {
+                    mostrarMensagem('msg-cardapio', data.message, false);
+                }
+            } catch (err) {
+                mostrarMensagem('msg-cardapio', 'Erro ao atualizar item!', false);
+            }
+        }
+
+        // Deletar item
+        async function deletarItem(id) {
+            if (!confirm('Tem certeza que deseja deletar este item?')) return;
+
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/cardapio/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await res.json();
+
+                if (data.sucesso) {
+                    mostrarMensagem('msg-cardapio', data.message, true);
+                    carregarCardapio();
+                } else {
+                    mostrarMensagem('msg-cardapio', data.message, false);
+                }
+            } catch (err) {
+                mostrarMensagem('msg-cardapio', 'Erro ao deletar item!', false);
+            }
+        }
+
+        // Carregar usuários
+        async function carregarUsuarios() {
+            try {
+                const res = await fetch('http://127.0.0.1:8000/usuarios_login');
+                const data = await res.json();
+
+                if (data.sucesso) {
+                    const tbody = document.getElementById('listaUsuarios');
+                    tbody.innerHTML = '';
+
+                    data.usuarios.forEach(usuario => {
+                        const dataLogin = new Date(usuario.ultimo_login).toLocaleString('pt-BR');
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${usuario.usuario}</td>
+                                <td>${usuario.total_logins}</td>
+                                <td>${dataLogin}</td>
+                            </tr>
+                        `;
+                    });
+
+                    document.getElementById('totalUsuarios').textContent = data.usuarios.length;
+                }
+            } catch (err) {
+                console.error('Erro:', err);
+            }
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('Deseja sair?')) {
+                sessionStorage.clear();
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Carregar cardápio ao abrir a página
+        carregarCardapio();
+    </script>
+</body>
+</html>

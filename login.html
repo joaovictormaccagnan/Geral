@@ -117,6 +117,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="mudarAba('admin')">👨‍💼 Admin</button>
             <button class="tab-btn" onclick="mudarAba('usuario')">👤 Usuário</button>
+            <button class="tab-btn" onclick="mudarAba('registro')">📝 Registrar</button>
         </div>
 
         <!-- ABA ADMIN -->
@@ -138,15 +139,33 @@
         <div id="usuario" class="tab-content">
             <h2>Login Usuário</h2>
             <form id="usuarioForm" onsubmit="loginUsuario(event)">
-                <label>Usuário (qualquer um):</label>
-                <input type="text" id="user_user" required placeholder="Ex: João">
+                <label>Usuário:</label>
+                <input type="text" id="user_user" required placeholder="Digite seu usuário">
                 
-                <label>Senha (qualquer uma):</label>
-                <input type="password" id="user_pass" required placeholder="Ex: 1234">
+                <label>Senha:</label>
+                <input type="password" id="user_pass" required placeholder="Digite sua senha">
                 
                 <button type="submit">Entrar como Usuário</button>
             </form>
             <p id="msg_usuario" class="msg"></p>
+        </div>
+
+        <!-- ABA REGISTRO -->
+        <div id="registro" class="tab-content">
+            <h2>Criar Conta</h2>
+            <form id="registroForm" onsubmit="registrarUsuario(event)">
+                <label>Usuário:</label>
+                <input type="text" id="reg_user" required placeholder="Escolha um usuário único">
+                
+                <label>Senha:</label>
+                <input type="password" id="reg_pass" required placeholder="Digite uma senha">
+                
+                <label>Confirmar Senha:</label>
+                <input type="password" id="reg_pass_confirm" required placeholder="Confirme a senha">
+                
+                <button type="submit">Registrar</button>
+            </form>
+            <p id="msg_registro" class="msg"></p>
         </div>
     </div>
     
@@ -155,6 +174,7 @@
         // Esconde todos os tabs
         document.getElementById('admin').classList.remove('active');
         document.getElementById('usuario').classList.remove('active');
+        document.getElementById('registro').classList.remove('active');
         
         // Remove active de todos os botões
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -190,7 +210,7 @@
                 mostrarMensagem('msg_admin', data.message, true);
                 sessionStorage.setItem('usuarioLogado', usuario);
                 sessionStorage.setItem('tipoLogin', 'admin');
-                setTimeout(() => window.location.href = 'relatorio.html', 1000);
+                setTimeout(() => window.location.href = 'admin.html', 1000);
             } else {
                 mostrarMensagem('msg_admin', data.message, false);
             }
@@ -223,6 +243,49 @@
             }
         } catch (err) {
             mostrarMensagem('msg_usuario', 'Erro de conexão!', false);
+        }
+    }
+
+    async function registrarUsuario(e) {
+        e.preventDefault();
+        const usuario = document.getElementById('reg_user').value;
+        const senha = document.getElementById('reg_pass').value;
+        const senhaConfirm = document.getElementById('reg_pass_confirm').value;
+
+        // Validar se as senhas coincidem
+        if (senha !== senhaConfirm) {
+            mostrarMensagem('msg_registro', '❌ As senhas não coincidem!', false);
+            return;
+        }
+
+        // Validar comprimento da senha
+        if (senha.length < 4) {
+            mostrarMensagem('msg_registro', '❌ A senha deve ter pelo menos 4 caracteres!', false);
+            return;
+        }
+
+        try {
+            const res = await fetch('http://127.0.0.1:8000/registro', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `usuario=${encodeURIComponent(usuario)}&senha=${encodeURIComponent(senha)}`
+            });
+            
+            const data = await res.json();
+            
+            if (data.sucesso) {
+                mostrarMensagem('msg_registro', data.message, true);
+                // Limpar formulário
+                document.getElementById('registroForm').reset();
+                // Redirecionar para login após 2 segundos
+                setTimeout(() => {
+                    mudarAba('usuario');
+                }, 2000);
+            } else {
+                mostrarMensagem('msg_registro', data.message, false);
+            }
+        } catch (err) {
+            mostrarMensagem('msg_registro', 'Erro de conexão!', false);
         }
     }
 </script>

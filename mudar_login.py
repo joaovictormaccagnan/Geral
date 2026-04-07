@@ -26,6 +26,9 @@ try:
         "UPDATE usuarios SET usuario = %s, senha = %s WHERE id = 1",
         (novo_usuario, senha_hash)
     )
+    cursor.execute("""
+    ALTER TABLE usuarios DROP COLUMN email
+    """)
     
     conn.commit()
     cursor.close()

@@ -285,108 +285,8 @@
             <p>Maison Café é uma cafeteria inspirada na cultura francesa. É um lugar aconchegante onde as pessoas podem fazer uma pausa e aproveitar cafés, doces e lanches deliciosos, como croissants, crepes e macarons.</p>
         </section>
 
-        <div class="menu-grid">
-            <div class="menu-category">
-                <h3>☕ Bebidas</h3>
-                <div class="menu-item">
-                    <span class="item-name">Café expresso</span>
-                    <span class="item-price">R$ 5,00</span>
-                    <button class="add-to-cart-btn" data-name="Café expresso" data-price="5.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Café com leite</span>
-                    <span class="item-price">R$ 6,00</span>
-                    <button class="add-to-cart-btn" data-name="Café com leite" data-price="6.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Cappuccino</span>
-                    <span class="item-price">R$ 8,00</span>
-                    <button class="add-to-cart-btn" data-name="Cappuccino" data-price="8.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Chocolate quente</span>
-                    <span class="item-price">R$ 7,00</span>
-                    <button class="add-to-cart-btn" data-name="Chocolate quente" data-price="7.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Chá</span>
-                    <span class="item-price">R$ 4,00</span>
-                    <button class="add-to-cart-btn" data-name="Chá" data-price="4.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Suco natural</span>
-                    <span class="item-price">R$ 7,00</span>
-                    <button class="add-to-cart-btn" data-name="Suco natural" data-price="7.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Milkshake</span>
-                    <span class="item-price">R$ 10,00</span>
-                    <button class="add-to-cart-btn" data-name="Milkshake" data-price="10.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Café gelado</span>
-                    <span class="item-price">R$ 9,00</span>
-                    <button class="add-to-cart-btn" data-name="Café gelado" data-price="9.00">Adicionar</button>
-                </div>
-            </div>
-
-            <div class="menu-category">
-                <h3>🥐 Comidas</h3>
-                <div class="menu-item">
-                    <span class="item-name">Croissant</span>
-                    <span class="item-price">R$ 8,00</span>
-                    <button class="add-to-cart-btn" data-name="Croissant" data-price="8.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Pain au chocolat</span>
-                    <span class="item-price">R$ 9,00</span>
-                    <button class="add-to-cart-btn" data-name="Pain au chocolat" data-price="9.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Baguette com queijo e presunto</span>
-                    <span class="item-price">R$ 10,00</span>
-                    <button class="add-to-cart-btn" data-name="Baguette com queijo e presunto" data-price="10.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Quiche</span>
-                    <span class="item-price">R$ 12,00</span>
-                    <button class="add-to-cart-btn" data-name="Quiche" data-price="12.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Crêpe (doce ou salgado)</span>
-                    <span class="item-price">R$ 11,00</span>
-                    <button class="add-to-cart-btn" data-name="Crêpe (doce ou salgado)" data-price="11.00">Adicionar</button>
-                </div>
-            </div>
-
-            <div class="menu-category">
-                <h3>🍰 Doces</h3>
-                <div class="menu-item">
-                    <span class="item-name">Macaron</span>
-                    <span class="item-price">R$ 6,00</span>
-                    <button class="add-to-cart-btn" data-name="Macaron" data-price="6.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Madeleine</span>
-                    <span class="item-price">R$ 7,00</span>
-                    <button class="add-to-cart-btn" data-name="Madeleine" data-price="7.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Éclair</span>
-                    <span class="item-price">R$ 9,00</span>
-                    <button class="add-to-cart-btn" data-name="Éclair" data-price="9.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Brownie</span>
-                    <span class="item-price">R$ 7,00</span>
-                    <button class="add-to-cart-btn" data-name="Brownie" data-price="7.00">Adicionar</button>
-                </div>
-                <div class="menu-item">
-                    <span class="item-name">Cookie</span>
-                    <span class="item-price">R$ 5,00</span>
-                    <button class="add-to-cart-btn" data-name="Cookie" data-price="5.00">Adicionar</button>
-                </div>
-            </div>
+        <div class="menu-grid" id="menuGrid">
+            <!-- Carregado dinamicamente via JavaScript -->
         </div>
 
         <section class="cart-section">
@@ -427,13 +327,82 @@ if (!usuarioLogado) {
 // Se for ADMIN, redireciona para o relatório
 const tipoLogin = sessionStorage.getItem("tipoLogin");
 if (tipoLogin === "admin") {
-    alert("👨‍💼 Admin detectado! Redirecionando para o relatório...");
-    window.location.href = "relatorio.html";
+    alert("👨‍💼 Admin detectado! Redirecionando para o painel admin...");
+    window.location.href = "admin.html";
 }
 
 let carrinho = [];
 
-// adicionar ao carrinho
+// Carregar cardápio dinamicamente
+async function carregarCardapio() {
+    try {
+        const res = await fetch('http://127.0.0.1:8000/cardapio');
+        const data = await res.json();
+
+        if (data.sucesso) {
+            const menuGrid = document.getElementById('menuGrid');
+            menuGrid.innerHTML = '';
+
+            // Agrupar itens por categoria
+            const porCategoria = {};
+            data.itens.forEach(item => {
+                if (!porCategoria[item.categoria]) {
+                    porCategoria[item.categoria] = [];
+                }
+                porCategoria[item.categoria].push(item);
+            });
+
+            // Criar categorias
+            const emojis = {
+                'Bebidas': '☕',
+                'Comidas': '🥐',
+                'Doces': '🍰'
+            };
+
+            Object.keys(porCategoria).forEach(categoria => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'menu-category';
+
+                const h3 = document.createElement('h3');
+                h3.innerHTML = `${emojis[categoria] || '📌'} ${categoria}`;
+                categoryDiv.appendChild(h3);
+
+                porCategoria[categoria].forEach(item => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'menu-item';
+                    itemDiv.innerHTML = `
+                        <span class="item-name">${item.nome}</span>
+                        <span class="item-price">R$ ${item.preco.toFixed(2)}</span>
+                        <button class="add-to-cart-btn" data-name="${item.nome}" data-price="${item.preco}">Adicionar</button>
+                    `;
+                    categoryDiv.appendChild(itemDiv);
+                });
+
+                menuGrid.appendChild(categoryDiv);
+            });
+
+            // Re-adicionar listeners aos botões
+            document.querySelectorAll(".add-to-cart-btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const nome = btn.getAttribute("data-name");
+                    const preco = parseFloat(btn.getAttribute("data-price"));
+
+                    const existente = carrinho.find(item => item.nome === nome);
+                    if (existente) {
+                        existente.qtd += 1;
+                    } else {
+                        carrinho.push({ nome, preco, qtd: 1 });
+                    }
+                    atualizarCarrinhoVisual();
+                });
+            });
+        }
+    } catch (err) {
+        console.error('Erro ao carregar cardápio:', err);
+    }
+}
+
+// adicionar ao carrinho (para elementos que já existem no HTML)
 document.querySelectorAll(".add-to-cart-btn").forEach(btn => {
     btn.addEventListener("click", () => {
         const nome = btn.getAttribute("data-name");
@@ -479,7 +448,58 @@ function removerItem(index) {
 function verCarrinho() {
     document.getElementById("carrinho").style.display = "block";
 }
+function fazerPedido() {
+    if (carrinho.length === 0) {
+        alert('❌ Seu carrinho está vazio!');
+        return;
+    }
+    verCarrinho();
+}
 
+async function finalizarCompra() {
+    if (carrinho.length === 0) {
+        alert('❌ Seu carrinho está vazio!');
+        return;
+    }
+
+    const usuario = sessionStorage.getItem('usuarioLogado');
+    const pagamento = document.querySelector('input[name="pagamento"]:checked').value;
+
+    try {
+        const res = await fetch('http://127.0.0.1:8000/salvar_pedido', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                usuario: usuario,
+                itens: carrinho,
+                pagamento: pagamento
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.sucesso) {
+            alert('✅ Pedido realizado com sucesso!');
+            carrinho = [];
+            atualizarCarrinhoVisual();
+            document.getElementById('carrinho').style.display = "none";
+        } else {
+            alert('❌ Erro ao realizar pedido: ' + data.message);
+        }
+    } catch (err) {
+        alert('❌ Erro de conexão!');
+    }
+}
+
+function logout() {
+    if (confirm('Deseja sair?')) {
+        sessionStorage.clear();
+        window.location.href = 'login.html';
+    }
+}
+
+// Carregar cardápio ao abrir a página
+carregarCardapio();
 function fazerPedido() {
     verCarrinho();
 }
