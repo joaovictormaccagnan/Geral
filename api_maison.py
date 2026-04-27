@@ -6,7 +6,7 @@ import bcrypt
 import json
 
 app = FastAPI(title="🚀 Maison Café API")
-
+# voce apenas da o caminho para a api (mostra o caminho) e endpoints
 # FUNÇÃO DB
 def get_db_connection():
     return mysql.connector.connect(
