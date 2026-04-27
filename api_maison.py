@@ -307,7 +307,6 @@ async def home():
     <h2>✅ Sistema funcionando perfeitamente!</h2>
     <p><strong>🔐 Login:</strong> <code>admin</code> / <code>senha123</code></p>
     <a href="/login.html" class="btn">🔐 Login</a>
-    <a href="/loja.html" class="btn">🛒 Loja</a>
     <a href="/docs" class="btn">📚 API Docs</a>
 </body>
 </html>

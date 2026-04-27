@@ -120,6 +120,7 @@
             <button class="tab-btn" onclick="mudarAba('registro')">📝 Registrar</button>
         </div>
 
+
         <!-- ABA ADMIN -->
         <div id="admin" class="tab-content active">
             <h2>Login Admin</h2>
@@ -135,6 +136,7 @@
             <p id="msg_admin" class="msg"></p>
         </div>
 
+
         <!-- ABA USUÁRIO -->
         <div id="usuario" class="tab-content">
             <h2>Login Usuário</h2>
@@ -149,6 +151,7 @@
             </form>
             <p id="msg_usuario" class="msg"></p>
         </div>
+
 
         <!-- ABA REGISTRO -->
         <div id="registro" class="tab-content">
@@ -168,7 +171,7 @@
             <p id="msg_registro" class="msg"></p>
         </div>
     </div>
-    
+  
 <script>
     function mudarAba(aba) {
         // Esconde todos os tabs
@@ -184,6 +187,7 @@
         event.target.classList.add('active');
     }
 
+
     function mostrarMensagem(elementoId, mensagem, sucesso) {
         const elemento = document.getElementById(elementoId);
         elemento.innerText = mensagem;
@@ -191,6 +195,7 @@
         elemento.classList.toggle('success', sucesso);
         elemento.classList.toggle('error', !sucesso);
     }
+
 
     async function loginAdmin(e) {
         e.preventDefault();
@@ -219,6 +224,7 @@
         }
     }
 
+
     async function loginUsuario(e) {
         e.preventDefault();
         const usuario = document.getElementById('user_user').value;
@@ -246,11 +252,13 @@
         }
     }
 
+
     async function registrarUsuario(e) {
         e.preventDefault();
         const usuario = document.getElementById('reg_user').value;
         const senha = document.getElementById('reg_pass').value;
         const senhaConfirm = document.getElementById('reg_pass_confirm').value;
+
 
         // Validar se as senhas coincidem
         if (senha !== senhaConfirm) {
@@ -258,11 +266,13 @@
             return;
         }
 
+
         // Validar comprimento da senha
         if (senha.length < 4) {
             mostrarMensagem('msg_registro', '❌ A senha deve ter pelo menos 4 caracteres!', false);
             return;
         }
+
 
         try {
             const res = await fetch('http://127.0.0.1:8000/registro', {
@@ -289,6 +299,7 @@
         }
     }
 </script>
+
 
 
 
