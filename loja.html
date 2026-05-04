@@ -5,6 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Maison Café - Cardápio</title>
     <style>
+        :root {
+            --primary-dark: #6F4E37;
+            --primary-light: #D4A574;
+            --primary-accent: #A0826D;
+            --bg-gradient-1: #f8fafc;
+            --bg-gradient-2: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+            --border-color: #cbd5e1;
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,21 +27,25 @@
         }
 
         body {
-            font-family: 'Georgia', serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
             line-height: 1.6;
-            color: #333;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            min-height: 100vh;
+            font-size: 16px;
         }
 
         header {
-            background: linear-gradient(45deg, #8B4513, #D2B48C);
+            background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary-accent) 100%);
             color: white;
-            padding: 1rem 0;
+            padding: 1.2rem 0;
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         nav {
@@ -39,47 +58,99 @@
         }
 
         .logo {
-            font-size: 2rem;
-            font-weight: bold;
-            letter-spacing: 2px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            animation: slideInLeft 0.5s ease-out;
         }
 
         .logout-btn {
-            background: rgba(255,255,255,0.2);
-            border: 1px solid white;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
             color: white;
-            padding: 10px 20px;
-            border-radius: 25px;
+            padding: 10px 22px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
         }
 
         .logout-btn:hover {
-            background: white;
-            color: #8B4513;
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .hero {
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><rect fill="%23f9f5f0" width="1200" height="600"/><path fill="%23D2B48C" opacity="0.3" d="M0 200 Q300 100 600 200 T1200 200 L1200 600 0 600Z"/><circle fill="%23f4e4bc" cx="200" cy="150" r="80"/><circle fill="%23f4e4bc" cx="1000" cy="180" r="60"/></svg>') center/cover;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-accent) 100%);
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            color: #8B4513;
-            margin-top: 80px;
+            color: white;
+            margin-top: 70px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 20% 50%, rgba(212, 165, 116, 0.2) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(160, 130, 109, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .hero-content h1 {
             font-size: 4rem;
             margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-weight: 700;
+            letter-spacing: -1px;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
         }
 
         .hero-content p {
             font-size: 1.5rem;
             max-width: 600px;
             margin: 0 auto;
+            font-weight: 300;
+            opacity: 0.95;
         }
 
         .container {
@@ -89,23 +160,28 @@
         }
 
         .biografia {
-            background: white;
-            padding: 3rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 4rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
             text-align: center;
             margin-bottom: 4rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 0.6s ease-out;
         }
 
         .biografia h2 {
-            color: #8B4513;
+            color: var(--primary-dark);
             font-size: 2.5rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
         }
 
         .biografia p {
-            font-size: 1.2rem;
-            color: #666;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
             max-width: 800px;
             margin: 0 auto;
             line-height: 1.8;
@@ -113,24 +189,50 @@
 
         .menu-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
             gap: 2rem;
             margin-bottom: 4rem;
         }
 
         .menu-category {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             padding: 2.5rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: scaleIn 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .menu-category:nth-child(1) { animation-delay: 0.1s; }
+        .menu-category:nth-child(2) { animation-delay: 0.2s; }
+        .menu-category:nth-child(3) { animation-delay: 0.3s; }
+
+        .menu-category:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
         }
 
         .menu-category h3 {
-            color: #8B4513;
-            font-size: 2rem;
+            color: var(--primary-dark);
+            font-size: 1.8rem;
             margin-bottom: 2rem;
-            border-bottom: 3px solid #D2B48C;
+            border-bottom: 3px solid var(--primary-light);
             padding-bottom: 1rem;
+            font-weight: 700;
         }
 
         .menu-item {
@@ -138,14 +240,15 @@
             justify-content: space-between;
             align-items: center;
             padding: 1rem 0;
-            border-bottom: 1px solid #eee;
-            transition: all 0.3s;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
         }
 
         .menu-item:hover {
-            background: #f9f5f0;
-            padding-left: 1rem;
-            border-radius: 5px;
+            background: var(--bg-gradient-1);
+            padding-left: 0.5rem;
+            border-radius: 6px;
+            padding-right: 0.5rem;
         }
 
         .menu-item:last-child {
@@ -154,112 +257,189 @@
 
         .item-name {
             font-size: 1.1rem;
-            font-weight: 500;
+            font-weight: 600;
             flex-grow: 1;
+            color: var(--text-primary);
         }
 
         .item-price {
             font-size: 1.2rem;
-            font-weight: bold;
-            color: #8B4513;
+            font-weight: 700;
+            color: var(--primary-dark);
             margin-right: 1rem;
         }
 
         .add-to-cart-btn {
             margin-left: 10px;
-            padding: 8px 15px;
-            border-radius: 20px;
+            padding: 8px 18px;
+            border-radius: 8px;
             border: none;
-            background: #8B4513;
-            color: #fff;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-accent) 100%);
+            color: white;
             cursor: pointer;
             font-size: 0.9rem;
-            font-weight: bold;
-            transition: all 0.3s;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-md);
         }
 
         .add-to-cart-btn:hover {
-            background: #D2B48C;
-            color: #8B4513;
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .add-to-cart-btn:active {
+            transform: translateY(0);
         }
 
         .cart-section {
-            background: white;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
             padding: 2.5rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .cart-section h3 {
+            color: var(--primary-dark);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
         }
 
         .cart-btn {
-            background: linear-gradient(45deg, #D2B48C, #8B4513);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-accent) 100%);
             color: white;
             border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            border-radius: 30px;
+            padding: 14px 36px;
+            font-size: 1.1rem;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             margin: 0 10px;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cart-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
         }
 
         .cart-btn:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(139,69,19,0.3);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .cart-btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         #carrinho {
             margin-top: 2rem;
         }
 
+        #cart-items {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-bottom: 2rem;
+        }
+
         #cart-items div {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 10px 0;
-            padding: 10px;
-            background: #f9f5f0;
-            border-radius: 10px;
+            margin: 12px 0;
+            padding: 12px;
+            background: var(--bg-gradient-1);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        #cart-items div:hover {
+            background: var(--bg-gradient-2);
+            border-color: var(--primary-light);
         }
 
         #cart-items button {
-            padding: 5px 12px;
-            border-radius: 15px;
+            padding: 6px 14px;
+            border-radius: 6px;
             border: none;
-            background: #8B4513;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: white;
             cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
         }
 
         #cart-items button:hover {
-            background: #D2B48C;
-            color: #8B4513;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        #cart-items p {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 1rem;
         }
 
         footer {
-            background: #8B4513;
+            background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary-accent) 100%);
             color: white;
             text-align: center;
             padding: 2rem;
             margin-top: 4rem;
+            font-weight: 500;
         }
 
         @media (max-width: 768px) {
             .hero-content h1 {
                 font-size: 2.5rem;
             }
+
+            .hero-content p {
+                font-size: 1.2rem;
+            }
+
             .menu-grid {
                 grid-template-columns: 1fr;
+                gap: 1.5rem;
             }
+
             .menu-item {
                 flex-direction: column;
                 align-items: flex-start;
             }
+
             .item-price {
                 margin-right: 0;
                 margin-bottom: 0.5rem;
+            }
+
+            .biografia {
+                padding: 2rem;
+            }
+
+            .cart-btn {
+                width: 100%;
+                margin: 10px 0;
             }
         }
     </style>
