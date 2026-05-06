@@ -97,6 +97,22 @@ try:
         conn.commit()
         print("✅ Cardápio padrão inserido!")
     
+    # Criar tabela de pagamentos
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS pagamentos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        usuario VARCHAR(100),
+        metodo VARCHAR(20) NOT NULL,
+        total DECIMAL(10,2) NOT NULL,
+        nome_titular VARCHAR(100) NOT NULL,
+        cpf VARCHAR(11),
+        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (usuario) REFERENCES usuarios(usuario)
+    )
+    """)
+    conn.commit()
+    print("✅ Tabela 'pagamentos' criada com sucesso!")
+    
 except Error as e:
     print(f"❌ Erro de conexão: {e}")
 

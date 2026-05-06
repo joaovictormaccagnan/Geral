@@ -23,26 +23,38 @@
         --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
     }
 
-    * {
-        box-sizing: border-box;
-    }
+        :root.dark-mode {
+            --bg-gradient-1: #1a1a1a;
+            --bg-gradient-2: #2d2d2d;
+            --text-primary: #f0f0f0;
+            --text-secondary: #a8a8a8;
+            --text-light: #808080;
+            --border-color: #404040;
+            --success-bg: #1a3a1a;
+            --success-text: #90ee90;
+            --error-bg: #3a1a1a;
+            --error-text: #ff9999;
+        }
 
-    body {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-        padding: 20px;
-        background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-        color: var(--text-primary);
-        font-size: 16px;
-        line-height: 1.6;
-    }
+        * {
+            box-sizing: border-box;
+        }
 
-    .container {
-        width: 100%;
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .container {
         max-width: 420px;
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(10px);
@@ -510,6 +522,37 @@
             mostrarMensagem('msg_registro', '❌ Erro de conexão! Verifique se a API está rodando.', false);
         }
     }
+
+    // ========== TEMA CLARO/ESCURO ==========
+    function toggleTheme() {
+        const html = document.documentElement;
+        const isDarkMode = html.classList.contains('dark-mode');
+        
+        if (isDarkMode) {
+            html.classList.remove('dark-mode');
+            localStorage.setItem('theme', 'light');
+            document.getElementById('themeToggle').textContent = '🌙 Escuro';
+        } else {
+            html.classList.add('dark-mode');
+            localStorage.setItem('theme', 'dark');
+            document.getElementById('themeToggle').textContent = '☀️ Claro';
+        }
+    }
+
+    function initializeTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        const html = document.documentElement;
+        
+        if (savedTheme === 'dark') {
+            html.classList.add('dark-mode');
+            document.getElementById('themeToggle').textContent = '☀️ Claro';
+        } else {
+            html.classList.remove('dark-mode');
+            document.getElementById('themeToggle').textContent = '🌙 Escuro';
+        }
+    }
+
+    initializeTheme();
 </script>
 
 </body>

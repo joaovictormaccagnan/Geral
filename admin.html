@@ -25,10 +25,27 @@
             --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
 
+        :root.dark-mode {
+            --bg-gradient-1: #141414;
+            --bg-gradient-2: #1e1e1e;
+            --text-primary: #f0ece8;
+            --text-secondary: #b0a89e;
+            --text-light: #7a7068;
+            --border-color: #3a3028;
+            --success-bg: #0d2218;
+            --success-text: #4ade80;
+            --error-bg: #2a0a0a;
+            --error-text: #f87171;
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: background-color 0.35s ease, border-color 0.35s ease, color 0.25s ease, box-shadow 0.35s ease;
         }
 
         body {
@@ -69,6 +86,29 @@
         .nav-buttons {
             display: flex;
             gap: 1rem;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .btn-header {
@@ -150,6 +190,42 @@
             animation: fadeInUp 0.4s ease-out;
         }
 
+        :root.dark-mode .tab-content {
+            background: rgba(22, 17, 14, 0.97);
+            border-color: rgba(111, 78, 55, 0.2);
+        }
+
+        :root.dark-mode input,
+        :root.dark-mode select {
+            background: #211a16 !important;
+            color: var(--text-primary) !important;
+            border-color: #4a3a2e !important;
+        }
+
+        :root.dark-mode input:hover,
+        :root.dark-mode select:hover {
+            border-color: var(--primary-light) !important;
+            background: #2a2018 !important;
+        }
+
+        :root.dark-mode input:focus,
+        :root.dark-mode select:focus {
+            background: #2a2018 !important;
+            border-color: var(--primary-dark) !important;
+        }
+
+        :root.dark-mode table {
+            background: rgba(22, 17, 14, 0.95);
+        }
+
+        :root.dark-mode td {
+            background: transparent;
+        }
+
+        :root.dark-mode tr:hover {
+            background: rgba(111, 78, 55, 0.1);
+        }
+
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -205,6 +281,8 @@
             color: var(--text-primary);
             transition: all 0.2s ease;
         }
+
+        /* dark-mode inputs já definidos acima */
 
         input::placeholder, select::placeholder {
             color: var(--text-light);
@@ -290,10 +368,15 @@
             box-shadow: var(--shadow-md);
         }
 
+        :root.dark-mode table {
+            /* já definido acima */
+        }
+
         th, td {
             padding: 14px 16px;
             text-align: left;
             border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
         }
 
         th {
@@ -309,6 +392,8 @@
             background: #f8fafc;
             transition: background 0.2s ease;
         }
+
+        /* dark-mode tr:hover já definido acima */
 
         .actions {
             display: flex;
@@ -434,6 +519,7 @@
         <nav>
             <div class="logo">🍵 Maison Café - Admin</div>
             <div class="nav-buttons">
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 Escuro</button>
                 <a href="relatorio.html" class="btn-header">📊 Relatório</a>
                 <button class="btn-header" onclick="logout()">🚪 Sair</button>
             </div>
@@ -722,6 +808,42 @@
                 window.location.href = 'login.html';
             }
         }
+
+        // ========== TEMA CLARO/ESCURO ==========
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark-mode');
+            const btn = document.getElementById('themeToggle');
+
+            if (isDark) {
+                html.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+                btn.innerHTML = '🌙 Escuro';
+            } else {
+                html.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                btn.innerHTML = '☀️ Claro';
+            }
+
+            btn.style.transform = 'scale(0.92)';
+            setTimeout(() => { btn.style.transform = ''; }, 150);
+        }
+
+        function initializeTheme() {
+            const saved = localStorage.getItem('theme') || 'light';
+            const html = document.documentElement;
+            const btn = document.getElementById('themeToggle');
+
+            if (saved === 'dark') {
+                html.classList.add('dark-mode');
+                btn.innerHTML = '☀️ Claro';
+            } else {
+                html.classList.remove('dark-mode');
+                btn.innerHTML = '🌙 Escuro';
+            }
+        }
+
+        initializeTheme();
 
         // Carregar cardápio ao abrir a página
         carregarCardapio();

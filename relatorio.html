@@ -20,10 +20,44 @@
             --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
 
+        :root.dark-mode {
+            --bg-gradient-1: #141414;
+            --bg-gradient-2: #1e1e1e;
+            --text-primary: #f0ece8;
+            --text-secondary: #b0a89e;
+            --text-light: #7a7068;
+            --border-color: #3a3028;
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        :root.dark-mode table {
+            background: rgba(22, 17, 14, 0.97);
+            border-color: rgba(111, 78, 55, 0.2);
+        }
+
+        :root.dark-mode td {
+            color: var(--text-primary);
+        }
+
+        :root.dark-mode tr:hover {
+            background: rgba(111, 78, 55, 0.1);
+        }
+
+        :root.dark-mode .itens {
+            background: rgba(111, 78, 55, 0.08);
+        }
+
+        :root.dark-mode .total {
+            color: var(--primary-light);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: background-color 0.35s ease, border-color 0.35s ease, color 0.25s ease, box-shadow 0.35s ease;
         }
 
         body {
@@ -40,6 +74,32 @@
             margin: 0 auto;
         }
 
+        .theme-toggle {
+            background: rgba(111, 78, 55, 0.3);
+            border: 1.5px solid rgba(111, 78, 55, 0.5);
+            color: var(--text-primary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        :root.dark-mode .theme-toggle {
+            background: rgba(200, 200, 200, 0.2);
+            border-color: rgba(200, 200, 200, 0.4);
+        }
+
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
         header {
             text-align: center;
             background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-accent) 100%);
@@ -50,6 +110,11 @@
             box-shadow: var(--shadow-lg);
             border: 1px solid rgba(255, 255, 255, 0.1);
             animation: slideDown 0.5s ease-out;
+        }
+
+        :root.dark-mode header {
+            background: linear-gradient(135deg, #2a1f18 0%, #1e1612 100%);
+            border-color: rgba(111, 78, 55, 0.3);
         }
 
         @keyframes slideDown {
@@ -295,6 +360,7 @@
             </div>
             <button class="btn" onclick="window.location.reload()">🔄 Atualizar</button>
             <button class="btn" style="background: linear-gradient(45deg, #ff4444, #cc0000);" onclick="limparPedidos()">🧹 Limpar Todos</button>
+            <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" style="margin: 0 1rem;">🌙 Escuro</button>
             <button class="btn" style="background: linear-gradient(45deg, #666, #333);" onclick="logout()">🚪 Sair</button>
         </header>
 
@@ -407,6 +473,42 @@
         
         carregarPedidos();
         setInterval(carregarPedidos, 10000); // Atualiza a cada 10s
+
+        // ========== TEMA CLARO/ESCURO ==========
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark-mode');
+            const btn = document.getElementById('themeToggle');
+
+            if (isDark) {
+                html.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+                btn.innerHTML = '🌙 Escuro';
+            } else {
+                html.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                btn.innerHTML = '☀️ Claro';
+            }
+
+            btn.style.transform = 'scale(0.92)';
+            setTimeout(() => { btn.style.transform = ''; }, 150);
+        }
+
+        function initializeTheme() {
+            const saved = localStorage.getItem('theme') || 'light';
+            const html = document.documentElement;
+            const btn = document.getElementById('themeToggle');
+
+            if (saved === 'dark') {
+                html.classList.add('dark-mode');
+                btn.innerHTML = '☀️ Claro';
+            } else {
+                html.classList.remove('dark-mode');
+                btn.innerHTML = '🌙 Escuro';
+            }
+        }
+
+        initializeTheme();
     </script>
 </body>
 </html>

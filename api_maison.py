@@ -284,6 +284,34 @@ async def listar_usuarios_login():
     finally:
         if conn: conn.close()
 
+@app.post("/salvar_pagamento")
+async def salvar_pagamento(request: Request):
+    conn = None
+    try:
+        data = await request.json()
+        usuario = data.get('usuario')
+        metodo = data.get('metodo')
+        total = data.get('total')
+        nome_titular = data.get('nome_titular')
+        cpf = data.get('cpf', '')
+
+        print(f"💳 SALVANDO PAGAMENTO: usuario={usuario}, metodo={metodo}, total=R$ {total}")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO pagamentos (usuario, metodo, total, nome_titular, cpf) VALUES (%s, %s, %s, %s, %s)",
+            (usuario, metodo, total, nome_titular, cpf)
+        )
+        conn.commit()
+        print("✅ PAGAMENTO SALVO!")
+        return {"sucesso": True, "message": "✅ Pagamento processado com sucesso!"}
+    except Exception as e:
+        print(f"❌ ERRO ao salvar pagamento: {e}")
+        return {"sucesso": False, "message": f"❌ Erro: {str(e)}"}
+    finally:
+        if conn: conn.close()
+
 # PÁGINAS HTML (ANTES do StaticFiles)
 @app.get("/")
 async def home():
@@ -319,6 +347,10 @@ async def get_login():
 @app.get("/loja.html")
 async def get_loja():
     return get_file_no_cache("loja.html")
+
+@app.get("/pagamento.html")
+async def get_pagamento():
+    return get_file_no_cache("pagamento.html")
 
 @app.get("/admin.html")
 async def get_admin():
