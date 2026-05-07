@@ -175,7 +175,7 @@ async def limpar_pedidos():
     print(f"🗑️ LIMPANDO TODOS OS PEDIDOS")
     conn = None
     try:
-        conn =  ()
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM pedidos")
         conn.commit()

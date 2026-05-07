@@ -388,7 +388,7 @@
             const tipoLogin = sessionStorage.getItem('tipoLogin');
             if (tipoLogin !== 'admin') {
                 alert('❌ Acesso negado! Apenas ADMIN pode ver o relatório.');
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             }
         }
 
@@ -467,7 +467,7 @@
         function logout() {
             if (confirm('Deseja sair?')) {
                 sessionStorage.clear();
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             }
         }
         
