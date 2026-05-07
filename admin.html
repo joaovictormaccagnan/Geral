@@ -530,6 +530,7 @@
         <div class="tabs">
             <button class="tab-btn active" onclick="abrirAba('cardapio')">🍽️ Cardápio</button>
             <button class="tab-btn" onclick="abrirAba('usuarios')">👥 Usuários</button>
+            <button class="tab-btn" onclick="irParaEstoque()">📦 Estoque</button>
         </div>
 
         <!-- ABA CARDÁPIO -->
@@ -799,6 +800,11 @@
             } catch (err) {
                 console.error('Erro:', err);
             }
+        }
+
+        // Ir para Estoque
+        function irParaEstoque() {
+            window.location.href = 'estoque.html';
         }
 
         // Logout

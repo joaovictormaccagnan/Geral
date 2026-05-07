@@ -97,6 +97,58 @@ try:
         conn.commit()
         print("✅ Cardápio padrão inserido!")
     
+    # Criar tabela de ESTOQUE (Admin)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS estoque (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        nome VARCHAR(100) UNIQUE NOT NULL,
+        categoria VARCHAR(50) NOT NULL,
+        quantidade INT NOT NULL DEFAULT 0,
+        preco_unitario DECIMAL(10,2) NOT NULL,
+        nivel_minimo INT NOT NULL DEFAULT 5,
+        unidade VARCHAR(20) NOT NULL,
+        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
+    """)
+    conn.commit()
+    print("✅ Tabela 'estoque' criada com sucesso!")
+    
+    # Inserir estoque padrão se ainda não existir
+    cursor.execute("SELECT COUNT(*) as count FROM estoque")
+    result = cursor.fetchone()
+    count = result[0] if isinstance(result, tuple) else result['count']
+    if count == 0:
+        estoque_padrao = [
+            # Bebidas
+            ('Bebidas', 'Café em grãos - Arábica Premium', 50, 45.00, 10, 'kg'),
+            ('Bebidas', 'Café em grãos - Robusta', 30, 28.00, 10, 'kg'),
+            ('Bebidas', 'Leite Integral', 100, 5.50, 20, 'L'),
+            ('Bebidas', 'Leite Desnatado', 50, 4.80, 10, 'L'),
+            ('Bebidas', 'Chocolate em pó', 15, 25.00, 3, 'kg'),
+            # Alimentos
+            ('Alimentos', 'Pão Francês Congelado', 200, 0.80, 50, 'un'),
+            ('Alimentos', 'Croissant Congelado', 150, 1.50, 30, 'un'),
+            ('Alimentos', 'Pain au Chocolat', 100, 2.00, 20, 'un'),
+            ('Alimentos', 'Ovos Grandes', 360, 0.50, 100, 'un'),
+            ('Alimentos', 'Farinha de Trigo', 20, 35.00, 5, 'kg'),
+            ('Alimentos', 'Açúcar Cristal', 15, 4.50, 5, 'kg'),
+            ('Alimentos', 'Sal Refinado', 5, 3.00, 2, 'kg'),
+            ('Alimentos', 'Manteiga', 20, 15.00, 5, 'kg'),
+            # Acessórios
+            ('Acessórios', 'Xícara de Porcelana', 100, 8.00, 20, 'un'),
+            ('Acessórios', 'Colher de Café', 50, 2.00, 10, 'un'),
+            ('Acessórios', 'Guardanapo', 500, 0.05, 200, 'un'),
+            ('Acessórios', 'Caneca Térmica', 30, 18.00, 10, 'un'),
+        ]
+        for categoria, nome, qtd, preco, minimo, unidade in estoque_padrao:
+            cursor.execute(
+                "INSERT INTO estoque (categoria, nome, quantidade, preco_unitario, nivel_minimo, unidade) VALUES (%s, %s, %s, %s, %s, %s)",
+                (categoria, nome, qtd, preco, minimo, unidade)
+            )
+        conn.commit()
+        print("✅ Estoque padrão inserido!")
+    
     # Criar tabela de pagamentos
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS pagamentos (
