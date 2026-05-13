@@ -1,11 +1,25 @@
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse, FileResponse, Response
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 import mysql.connector
 import bcrypt
 import json
+from chatbot_ia import chatbot
 
 app = FastAPI(title="🚀 Maison Café API")
+
+# ============================================
+# CORS - Permitir requisições do frontend
+# ============================================
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permitir de qualquer origem
+    allow_credentials=True,
+    allow_methods=["*"],  # GET, POST, DELETE, etc
+    allow_headers=["*"],  # Todos os headers
+)
+
 # voce apenas da o caminho para a api (mostra o caminho) e endpoints
 # FUNÇÃO DB
 def get_db_connection():
@@ -485,6 +499,65 @@ async def reabastecimento(item_id: int, request: Request):
     finally:
         if conn: conn.close()
 
+# ============================================
+# ENDPOINTS DO CHATBOT IA 🤖
+# ============================================
+@app.post("/chat")
+async def chat(request: Request):
+    """Endpoint do Chatbot IA - Responde perguntas sobre receitas e site"""
+    try:
+        data = await request.json()
+        mensagem = data.get('mensagem', '').strip()
+        usuario_id = data.get('usuario_id', 'guest')
+        
+        if not mensagem:
+            return {"erro": "Mensagem vazia"}
+        
+        print(f"💬 CHATBOT: usuario={usuario_id}, mensagem={mensagem[:50]}")
+        
+        # Processar mensagem com chatbot
+        resposta = chatbot.processar_entrada(mensagem, usuario_id)
+        
+        return {
+            "sucesso": True,
+            "resposta": resposta['resposta'],
+            "confianca": resposta['confianca'],
+            "sugestoes": resposta['sugestoes'],
+            "tipo": resposta['tipo']
+        }
+    except Exception as e:
+        print(f"❌ ERRO CHATBOT: {e}")
+        return {"sucesso": False, "erro": str(e)}
+
+@app.get("/chat/historico/{usuario_id}")
+async def obter_historico(usuario_id: str):
+    """Obtém histórico de conversas do usuário"""
+    try:
+        historico = chatbot.obter_historico(usuario_id)
+        return {"sucesso": True, "historico": historico}
+    except Exception as e:
+        return {"sucesso": False, "erro": str(e)}
+
+@app.get("/chat/receitas")
+async def listar_receitas():
+    """Lista todas as receitas disponíveis"""
+    from chatbot_ia import KNOWLEDGE_BASE
+    try:
+        receitas = KNOWLEDGE_BASE['receitas']
+        return {"sucesso": True, "receitas": receitas, "total": len(receitas)}
+    except Exception as e:
+        return {"sucesso": False, "erro": str(e)}
+
+@app.get("/chat/faqs")
+async def listar_faqs():
+    """Lista todos os FAQs"""
+    from chatbot_ia import KNOWLEDGE_BASE
+    try:
+        faqs = KNOWLEDGE_BASE['faqs']
+        return {"sucesso": True, "faqs": faqs, "total": len(faqs)}
+    except Exception as e:
+        return {"sucesso": False, "erro": str(e)}
+
 # PÁGINAS HTML (ANTES do StaticFiles)
 @app.get("/")
 async def home():
@@ -536,6 +609,10 @@ async def get_relatorio():
 @app.get("/estoque.html")
 async def get_estoque():
     return get_file_no_cache("estoque.html")
+
+@app.get("/chatbot_widget.js")
+async def get_chatbot_widget():
+    return get_file_no_cache("chatbot_widget.js")
 
 # StaticFiles NO FINAL (só arquivos CSS/JS)
 app.mount("/static", StaticFiles(directory="."), name="static")
