@@ -175,7 +175,7 @@ async def limpar_pedidos():
     print(f"🗑️ LIMPANDO TODOS OS PEDIDOS")
     conn = None
     try:
-        conn =  ()
+        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM pedidos")
         conn.commit()
@@ -284,6 +284,207 @@ async def listar_usuarios_login():
     finally:
         if conn: conn.close()
 
+@app.post("/salvar_pagamento")
+async def salvar_pagamento(request: Request):
+    conn = None
+    try:
+        data = await request.json()
+        usuario = data.get('usuario')
+        metodo = data.get('metodo')
+        total = data.get('total')
+        nome_titular = data.get('nome_titular')
+        cpf = data.get('cpf', '')
+
+        print(f"💳 SALVANDO PAGAMENTO: usuario={usuario}, metodo={metodo}, total=R$ {total}")
+
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO pagamentos (usuario, metodo, total, nome_titular, cpf) VALUES (%s, %s, %s, %s, %s)",
+            (usuario, metodo, total, nome_titular, cpf)
+        )
+        conn.commit()
+        print("✅ PAGAMENTO SALVO!")
+        return {"sucesso": True, "message": "✅ Pagamento processado com sucesso!"}
+    except Exception as e:
+        print(f"❌ ERRO ao salvar pagamento: {e}")
+        return {"sucesso": False, "message": f"❌ Erro: {str(e)}"}
+    finally:
+        if conn: conn.close()
+
+# ========== ENDPOINTS DE ESTOQUE (ADMIN) ==========
+@app.get("/estoque")
+async def listar_estoque():
+    """Listar todos os produtos do estoque"""
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, nome, categoria, quantidade, preco_unitario, nivel_minimo, unidade, criado_em
+            FROM estoque
+            ORDER BY categoria, nome
+        """)
+        estoque = cursor.fetchall()
+        return {"sucesso": True, "estoque": estoque}
+    except Exception as e:
+        print(f"❌ ERRO ao listar estoque: {e}")
+        return {"sucesso": False, "estoque": [], "message": f"❌ Erro: {str(e)}"}
+    finally:
+        if conn: conn.close()
+
+@app.get("/estoque/{item_id}")
+async def obter_estoque(item_id: int):
+    """Obter detalhes de um produto específico"""
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT id, nome, categoria, quantidade, preco_unitario, nivel_minimo, unidade, criado_em
+            FROM estoque
+            WHERE id = %s
+        """, (item_id,))
+        produto = cursor.fetchone()
+        
+        if produto:
+            return {"sucesso": True, "produto": produto}
+        return {"sucesso": False, "message": "❌ Produto não encontrado!"}
+    except Exception as e:
+        print(f"❌ ERRO ao obter estoque: {e}")
+        return {"sucesso": False, "message": f"❌ Erro: {str(e)}"}
+    finally:
+        if conn: conn.close()
+
+@app.post("/estoque")
+async def adicionar_estoque(
+    nome: str = Form(...),
+    categoria: str = Form(...),
+    quantidade: int = Form(...),
+    preco_unitario: float = Form(...),
+    nivel_minimo: int = Form(...),
+    unidade: str = Form(...)
+):
+    """Adicionar novo produto ao estoque"""
+    print(f"➕ ADICIONANDO ESTOQUE: {nome} - {quantidade} {unidade}")
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO estoque (nome, categoria, quantidade, preco_unitario, nivel_minimo, unidade)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (nome, categoria, quantidade, preco_unitario, nivel_minimo, unidade))
+        conn.commit()
+        print("✅ PRODUTO ADICIONADO AO ESTOQUE!")
+        return {"sucesso": True, "message": "✅ Produto adicionado com sucesso!"}
+    except mysql.connector.errors.IntegrityError:
+        return {"sucesso": False, "message": "❌ Produto já existe!"}
+    except Exception as e:
+        print(f"❌ ERRO ao adicionar estoque: {e}")
+        return {"sucesso": False, "message": f"❌ Erro: {str(e)}"}
+    finally:
+        if conn: conn.close()
+
+@app.put("/estoque/{item_id}")
+async def atualizar_estoque(
+    item_id: int,
+    nome: str = Form(...),
+    categoria: str = Form(...),
+    quantidade: int = Form(...),
+    preco_unitario: float = Form(...),
+    nivel_minimo: int = Form(...),
+    unidade: str = Form(...)
+):
+    """Atualizar produto do estoque"""
+    print(f"✏️ ATUALIZANDO ESTOQUE {item_id}: {nome}")
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE estoque
+            SET nome = %s, categoria = %s, quantidade = %s, preco_unitario = %s, nivel_minimo = %s, unidade = %s
+            WHERE id = %s
+        """, (nome, categoria, quantidade, preco_unitario, nivel_minimo, unidade, item_id))
+        conn.commit()
+        
+        if cursor.rowcount > 0:
+            print("✅ ESTOQUE ATUALIZADO!")
+            return {"sucesso": True, "message": "✅ Produto atualizado com sucesso!"}
+        return {"sucesso": False, "message": "❌ Produto não encontrado!"}
+    except Exception as e:
+        print(f"❌ ERRO ao atualizar estoque: {e}")
+        return {"sucesso": False, "message": f"❌ Erro: {str(e)}"}
+    finally:
+        if conn: conn.close()
+
+@app.delete("/estoque/{item_id}")
+async def deletar_estoque(item_id: int):
+    """Deletar produto do estoque"""
+    print(f"🗑️ DELETANDO ESTOQUE: id={item_id}")
+    conn = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM estoque WHERE id = %s", (item_id,))
+        conn.commit()
+        
+        if cursor.rowcount > 0:
+            print("✅ ESTOQUE DELETADO!")
+            return {"sucesso": True, "message": "✅ Produto deletado com sucesso!"}
+        return {"sucesso": False, "message": "❌ Produto não encontrado!"}
+    except Exception as e:
+        print(f"❌ ERRO ao deletar estoque: {e}")
+        return {"sucesso": False, "message": f"❌ Erro: {str(e)}"}
+    finally:
+        if conn: conn.close()
+
+@app.post("/estoque/{item_id}/reabastecimento")
+async def reabastecimento(item_id: int, request: Request):
+    """Reabastecimento de produto (aumentar quantidade e atualizar preço)"""
+    conn = None
+    try:
+        data = await request.json()
+        quantidade_adicionar = data.get('quantidade_adicionar', 0)
+        preco_reabastecimento = data.get('preco_reabastecimento', 0)
+        
+        print(f"📦 REABASTECIMENTO: id={item_id}, qtd={quantidade_adicionar}, preco=R$ {preco_reabastecimento}")
+        
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Buscar produto atual
+        cursor.execute("SELECT quantidade, preco_unitario FROM estoque WHERE id = %s", (item_id,))
+        produto = cursor.fetchone()
+        
+        if not produto:
+            return {"sucesso": False, "message": "❌ Produto não encontrado!"}
+        
+        nova_quantidade = produto['quantidade'] + quantidade_adicionar
+        custo_total = quantidade_adicionar * preco_reabastecimento
+        
+        # Atualizar estoque
+        cursor.execute("""
+            UPDATE estoque
+            SET quantidade = %s, preco_unitario = %s
+            WHERE id = %s
+        """, (nova_quantidade, preco_reabastecimento, item_id))
+        conn.commit()
+        
+        print("✅ REABASTECIMENTO REALIZADO!")
+        return {
+            "sucesso": True,
+            "message": f"✅ Reabastecimento realizado! Custo total: R$ {custo_total:.2f}",
+            "quantidade_nova": nova_quantidade,
+            "custo_total": custo_total
+        }
+    except Exception as e:
+        print(f"❌ ERRO ao fazer reabastecimento: {e}")
+        return {"sucesso": False, "message": f"❌ Erro: {str(e)}"}
+    finally:
+        if conn: conn.close()
+
 # PÁGINAS HTML (ANTES do StaticFiles)
 @app.get("/")
 async def home():
@@ -306,19 +507,23 @@ async def home():
     <h1>🍵 Maison Café</h1>
     <h2>✅ Sistema funcionando perfeitamente!</h2>
     <p><strong>🔐 Login:</strong> <code>admin</code> / <code>senha123</code></p>
-    <a href="/login.html" class="btn">🔐 Login</a>
+    <a href="/index.html" class="btn">🔐 Login</a>
     <a href="/docs" class="btn">📚 API Docs</a>
 </body>
 </html>
     """)
 
-@app.get("/login.html")
-async def get_login():
-    return get_file_no_cache("login.html")
+@app.get("/index.html")
+async def get_index():
+    return get_file_no_cache("index.html")
 
 @app.get("/loja.html")
 async def get_loja():
     return get_file_no_cache("loja.html")
+
+@app.get("/pagamento.html")
+async def get_pagamento():
+    return get_file_no_cache("pagamento.html")
 
 @app.get("/admin.html")
 async def get_admin():
@@ -327,6 +532,10 @@ async def get_admin():
 @app.get("/relatorio.html")
 async def get_relatorio():
     return get_file_no_cache("relatorio.html")
+
+@app.get("/estoque.html")
+async def get_estoque():
+    return get_file_no_cache("estoque.html")
 
 # StaticFiles NO FINAL (só arquivos CSS/JS)
 app.mount("/static", StaticFiles(directory="."), name="static")

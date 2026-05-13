@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maison Café - Pagamento</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <style>
+        :root {
+            --primary-dark: #6F4E37;
+            --primary-light: #D4A574;
+            --primary-accent: #A0826D;
+            --bg-gradient-1: #f8fafc;
+            --bg-gradient-2: #e2e8f0;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+            --border-color: #cbd5e1;
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.2);
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+            --warning-color: #f97316;
+        }
+
+        :root.dark-mode {
+            --bg-gradient-1: #141414;
+            --bg-gradient-2: #1e1e1e;
+            --text-primary: #f0ece8;
+            --text-secondary: #b0a89e;
+            --text-light: #7a7068;
+            --border-color: #3a3028;
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+            --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.35s ease, border-color 0.35s ease, color 0.25s ease, box-shadow 0.35s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 100%);
+            min-height: 100vh;
+            font-size: 16px;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary-accent) 100%);
+            color: white;
+            padding: 1.2rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-lg);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            gap: 1rem;
+        }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1.5px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .page-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title h1 {
+            color: var(--primary-dark);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-title p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .order-summary {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        :root.dark-mode .order-summary {
+            background: rgba(22, 17, 14, 0.97);
+            border-color: rgba(111, 78, 55, 0.25);
+        }
+
+        :root.dark-mode .payment-container {
+            background: rgba(22, 17, 14, 0.97);
+            border-color: rgba(111, 78, 55, 0.25);
+        }
+
+        :root.dark-mode .pix-section,
+        :root.dark-mode .bitcoin-section {
+            background: #1a1410;
+            border-color: #3a3028;
+        }
+
+        .order-summary h2 {
+            color: var(--primary-dark);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--primary-light);
+            padding-bottom: 1rem;
+        }
+
+        .order-items {
+            margin-bottom: 1.5rem;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .order-item-qty {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 0 1rem;
+        }
+
+        .order-item-price {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .order-total {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-accent) 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .order-total-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .order-total-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .payment-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* dark-mode payment-container já definido acima */
+
+        .payment-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .payment-tab {
+            background: none;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            margin-bottom: -2px;
+        }
+
+        .payment-tab:hover {
+            color: var(--primary-dark);
+        }
+
+        .payment-tab.active {
+            color: white;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-accent) 100%);
+            border-bottom-color: var(--primary-light);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .payment-content {
+            display: none;
+        }
+
+        .payment-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            background: white;
+            color: var(--text-primary);
+        }
+
+        :root.dark-mode .form-group input {
+            background: #211a16;
+            border-color: #4a3a2e;
+            color: var(--text-primary);
+        }
+
+        :root.dark-mode .form-group input:focus {
+            background: #2a2018;
+            border-color: var(--primary-dark);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 0 3px rgba(111, 78, 55, 0.1);
+        }
+
+        .form-group input.error {
+            border-color: var(--error-color);
+            background: rgba(239, 68, 68, 0.05);
+        }
+
+        .form-error {
+            color: var(--error-color);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .form-error.show {
+            display: block;
+        }
+
+        .pix-section {
+            background: var(--bg-gradient-1);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .qrcode-container {
+            text-align: center;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        :root.dark-mode .qrcode-container {
+            background: #f5f5f5; /* QR Code precisa de fundo claro para ser escaneável */
+        }
+
+        .qrcode-container canvas {
+            max-width: 250px;
+            margin: auto;
+            display: block;
+        }
+
+        .pix-copy {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin: 1rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        :root.dark-mode .pix-copy {
+            background: #211a16;
+            border-color: #4a3a2e;
+        }
+
+        :root.dark-mode .bitcoin-address {
+            background: #211a16;
+            border-color: #4a3a2e;
+            color: var(--text-primary);
+        }
+
+        .pix-copy-code {
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            word-break: break-all;
+            flex-grow: 1;
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-accent) 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            margin-left: 1rem;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .bitcoin-section {
+            background: var(--bg-gradient-1);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .bitcoin-address {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 1rem 0;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        /* dark-mode bitcoin-address já definido acima */
+
+        .bitcoin-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 1rem 0;
+        }
+
+        .confirm-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-accent) 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-md);
+            margin-top: 2rem;
+        }
+
+        .confirm-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .confirm-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.success {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: var(--success-color);
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error-color);
+        }
+
+        .message.warning {
+            background: rgba(249, 115, 22, 0.1);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            color: var(--warning-color);
+        }
+
+        .success-screen {
+            display: none;
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(34, 197, 94, 0.05);
+            border-radius: 12px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .success-screen.show {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .success-screen h2 {
+            color: var(--success-color);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-screen p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-dark) 0%, var(--primary-accent) 100%);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .order-summary {
+                position: static;
+            }
+
+            .page-title h1 {
+                font-size: 1.8rem;
+            }
+
+            .payment-tabs {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .payment-tab {
+                padding: 0.75rem 1rem;
+            }
+
+            .payment-tab.active {
+                border-radius: 8px;
+                margin-bottom: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">🍵 Maison Café - Pagamento</div>
+            <div style="display: flex; gap: 1rem;">
+                <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()">🌙 Escuro</button>
+                <button class="logout-btn" onclick="logout()">Sair</button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-title">
+            <h1>Finalizar Pagamento</h1>
+            <p>Complete seu pedido escolhendo uma forma de pagamento</p>
+        </div>
+
+        <div id="successScreen" class="success-screen">
+            <div class="success-icon">✅</div>
+            <h2>Pagamento Confirmado!</h2>
+            <p>Seu pedido foi processado com sucesso. Você será redirecionado em alguns segundos...</p>
+        </div>
+
+        <div id="mainContent">
+            <div class="main-grid">
+                <!-- Resumo do Pedido -->
+                <div class="order-summary">
+                    <h2>Resumo do Pedido</h2>
+                    <div class="order-items" id="orderItems">
+                        <!-- Preenchido por JavaScript -->
+                    </div>
+                    <div class="order-total">
+                        <div class="order-total-label">Total a Pagar</div>
+                        <div class="order-total-value">R$ <span id="totalAmount">0.00</span></div>
+                    </div>
+                </div>
+
+                <!-- Formas de Pagamento -->
+                <div class="payment-container">
+                    <div id="message" class="message"></div>
+
+                    <div class="payment-tabs">
+                        <button class="payment-tab active" onclick="switchPaymentMethod('pix')">💳 Pix</button>
+                        <button class="payment-tab" onclick="switchPaymentMethod('cartao')">🏦 Cartão</button>
+                        <button class="payment-tab" onclick="switchPaymentMethod('bitcoin')">₿ Bitcoin</button>
+                    </div>
+
+                    <!-- Pix -->
+                    <div id="pixContent" class="payment-content active">
+                        <div class="form-group">
+                            <label for="pixNome">Nome Completo</label>
+                            <input type="text" id="pixNome" placeholder="Seu nome completo">
+                            <div class="form-error"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="pixCpf">CPF</label>
+                            <input type="text" id="pixCpf" placeholder="000.000.000-00" maxlength="14">
+                            <div class="form-error"></div>
+                        </div>
+
+                        <div class="pix-section">
+                            <h3 style="color: var(--primary-dark); margin-bottom: 1rem;">QR Code Pix</h3>
+                            <div id="qrcodePixContainer" class="qrcode-container">
+                                <p style="color: var(--text-secondary);">QR Code será gerado ao preencher os dados</p>
+                            </div>
+
+                            <h3 style="color: var(--primary-dark); margin-top: 1.5rem; margin-bottom: 0.5rem;">Código Copia e Cola</h3>
+                            <div class="pix-copy">
+                                <div class="pix-copy-code" id="pixCopyCode">00020126580014br.gov.bcb.pix0136xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</div>
+                                <button class="copy-btn" onclick="copyToClipboard('pixCopyCode')">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cartão de Crédito -->
+                    <div id="cartaoContent" class="payment-content">
+                        <div class="form-group">
+                            <label for="cartaoNome">Nome no Cartão</label>
+                            <input type="text" id="cartaoNome" placeholder="Como está no cartão">
+                            <div class="form-error"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cartaoCpf">CPF</label>
+                            <input type="text" id="cartaoCpf" placeholder="000.000.000-00" maxlength="14">
+                            <div class="form-error"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="cartaoNumero">Número do Cartão</label>
+                            <input type="text" id="cartaoNumero" placeholder="0000 0000 0000 0000" maxlength="19">
+                            <div class="form-error"></div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label for="cartaoValidade">Validade (MM/AA)</label>
+                                <input type="text" id="cartaoValidade" placeholder="MM/AA" maxlength="5">
+                                <div class="form-error"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cartaoCvv">CVV</label>
+                                <input type="text" id="cartaoCvv" placeholder="000" maxlength="3">
+                                <div class="form-error"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bitcoin -->
+                    <div id="bitcoinContent" class="payment-content">
+                        <div class="bitcoin-section">
+                            <h3 style="color: var(--primary-dark); margin-bottom: 1rem;">Endereço Bitcoin</h3>
+                            <div class="bitcoin-address">
+                                1A1z7agoat2DLQ5BxQzwjCxY6iVsNKC7d5
+                            </div>
+
+                            <h3 style="color: var(--primary-dark); margin-top: 1.5rem; margin-bottom: 0.5rem;">Valor em Bitcoin</h3>
+                            <div class="bitcoin-value" id="bitcoinValue">0.00001 BTC</div>
+
+                            <div id="qrcodeBitcoinContainer" class="qrcode-container">
+                                <!-- QR Code será gerado por JavaScript -->
+                            </div>
+
+                            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 1rem;">
+                                Taxa de câmbio: 1 BTC = R$ 600.000,00 (fictícia)
+                            </p>
+                        </div>
+                    </div>
+
+                    <button class="confirm-btn" onclick="confirmarPagamento()">✓ Confirmar Pagamento</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Maison Café - Maringá, PR</p>
+    </footer>
+
+    <script>
+        // ========== VERIFICAÇÃO INICIAL ==========
+        const usuarioLogado = sessionStorage.getItem("usuarioLogado");
+        const carrinhoPedido = sessionStorage.getItem("carrinhoPedido");
+        const totalPedido = sessionStorage.getItem("totalPedido");
+
+        if (!usuarioLogado || !carrinhoPedido) {
+            window.location.href = 'loja.html';
+        }
+
+        let paymentMethod = 'pix';
+
+        // ========== CARREGAR RESUMO DO PEDIDO ==========
+        function carregarResumoPedido() {
+            const itens = JSON.parse(carrinhoPedido);
+            const orderItemsDiv = document.getElementById('orderItems');
+            const totalAmountSpan = document.getElementById('totalAmount');
+
+            orderItemsDiv.innerHTML = '';
+            itens.forEach(item => {
+                const subtotal = item.preco * item.qtd;
+                const div = document.createElement('div');
+                div.className = 'order-item';
+                div.innerHTML = `
+                    <span class="order-item-name">${item.nome}</span>
+                    <span class="order-item-qty">${item.qtd}x</span>
+                    <span class="order-item-price">R$ ${subtotal.toFixed(2)}</span>
+                `;
+                orderItemsDiv.appendChild(div);
+            });
+
+            totalAmountSpan.textContent = parseFloat(totalPedido).toFixed(2);
+            atualizarBitcoinValor();
+        }
+
+        // ========== VALIDAÇÃO DE CPF ==========
+        function validarCPF(cpf) {
+            const limpo = cpf.replace(/\D/g, '');
+            if (limpo.length !== 11) return false;
+
+            let soma = 0;
+            let resto;
+
+            // Validar primeiro dígito
+            for (let i = 0; i < 9; i++) {
+                soma += parseInt(limpo.charAt(i)) * (10 - i);
+            }
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            if (resto !== parseInt(limpo.charAt(9))) return false;
+
+            // Validar segundo dígito
+            soma = 0;
+            for (let i = 0; i < 10; i++) {
+                soma += parseInt(limpo.charAt(i)) * (11 - i);
+            }
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            if (resto !== parseInt(limpo.charAt(10))) return false;
+
+            return true;
+        }
+
+        // ========== MÁSCARAS DE INPUT ==========
+        document.getElementById('pixCpf').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
+            if (value.length > 8) {
+                value = value.slice(0, 3) + '.' + value.slice(3, 6) + '.' + value.slice(6, 9) + '-' + value.slice(9);
+            } else if (value.length > 5) {
+                value = value.slice(0, 3) + '.' + value.slice(3, 6) + '.' + value.slice(6);
+            } else if (value.length > 2) {
+                value = value.slice(0, 3) + '.' + value.slice(3);
+            }
+            e.target.value = value;
+        });
+
+        document.getElementById('cartaoCpf').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
+            if (value.length > 8) {
+                value = value.slice(0, 3) + '.' + value.slice(3, 6) + '.' + value.slice(6, 9) + '-' + value.slice(9);
+            } else if (value.length > 5) {
+                value = value.slice(0, 3) + '.' + value.slice(3, 6) + '.' + value.slice(6);
+            } else if (value.length > 2) {
+                value = value.slice(0, 3) + '.' + value.slice(3);
+            }
+            e.target.value = value;
+        });
+
+        document.getElementById('cartaoNumero').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 16) value = value.slice(0, 16);
+            let formatted = '';
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) formatted += ' ';
+                formatted += value[i];
+            }
+            e.target.value = formatted;
+        });
+
+        document.getElementById('cartaoValidade').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 4) value = value.slice(0, 4);
+            if (value.length > 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2);
+            }
+            e.target.value = value;
+        });
+
+        document.getElementById('cartaoCvv').addEventListener('input', function(e) {
+            e.target.value = e.target.value.replace(/\D/g, '').slice(0, 3);
+        });
+
+        // ========== MUDAR MÉTODO DE PAGAMENTO ==========
+        function switchPaymentMethod(method) {
+            paymentMethod = method;
+            document.querySelectorAll('.payment-tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.payment-content').forEach(content => content.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById(method + 'Content').classList.add('active');
+
+            if (method === 'bitcoin') {
+                gerarQRCodeBitcoin();
+            }
+        }
+
+        // ========== GERAR QR CODE BITCOIN ==========
+        function gerarQRCodeBitcoin() {
+            const container = document.getElementById('qrcodeBitcoinContainer');
+            container.innerHTML = '';
+
+            const qr = qrcode(4, 'M');
+            qr.addData('bitcoin:1A1z7agoat2DLQ5BxQzwjCxY6iVsNKC7d5?amount=' + (parseFloat(totalPedido) / 600000).toFixed(8));
+            qr.make();
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const moduleCount = qr.getModuleCount();
+            const pixelSize = 3;
+
+            canvas.width = moduleCount * pixelSize;
+            canvas.height = moduleCount * pixelSize;
+
+            for (let row = 0; row < moduleCount; row++) {
+                for (let col = 0; col < moduleCount; col++) {
+                    ctx.fillStyle = qr.isDark(row, col) ? '#000' : '#fff';
+                    ctx.fillRect(col * pixelSize, row * pixelSize, pixelSize, pixelSize);
+                }
+            }
+
+            container.appendChild(canvas);
+        }
+
+        // ========== ATUALIZAR VALOR BITCOIN ==========
+        function atualizarBitcoinValor() {
+            const btcValue = (parseFloat(totalPedido) / 600000).toFixed(8);
+            document.getElementById('bitcoinValue').textContent = btcValue + ' BTC';
+            gerarQRCodeBitcoin();
+        }
+
+        // ========== GERAR QR CODE PIX ==========
+        function gerarQRCodePix() {
+            const nome = document.getElementById('pixNome').value.trim();
+            const cpf = document.getElementById('pixCpf').value.replace(/\D/g, '');
+
+            if (!nome || !validarCPF(document.getElementById('pixCpf').value)) {
+                return;
+            }
+
+            const container = document.getElementById('qrcodePixContainer');
+            container.innerHTML = '';
+
+            // Dados Pix fictícios
+            const pixData = `00020126580014br.gov.bcb.pix0136xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx5204000053039865406${totalPedido.replace('.', '').padStart(10, '0')}5802BR5913MAISON CAFE6009MARINGA62410503***`;
+
+            const qr = qrcode(4, 'M');
+            qr.addData(pixData);
+            qr.make();
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const moduleCount = qr.getModuleCount();
+            const pixelSize = 3;
+
+            canvas.width = moduleCount * pixelSize;
+            canvas.height = moduleCount * pixelSize;
+
+            for (let row = 0; row < moduleCount; row++) {
+                for (let col = 0; col < moduleCount; col++) {
+                    ctx.fillStyle = qr.isDark(row, col) ? '#000' : '#fff';
+                    ctx.fillRect(col * pixelSize, row * pixelSize, pixelSize, pixelSize);
+                }
+            }
+
+            container.appendChild(canvas);
+            document.getElementById('pixCopyCode').textContent = pixData;
+        }
+
+        document.getElementById('pixNome').addEventListener('input', gerarQRCodePix);
+        document.getElementById('pixCpf').addEventListener('input', gerarQRCodePix);
+
+        // ========== COPIAR PARA ÁREA DE TRANSFERÊNCIA ==========
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent;
+
+            navigator.clipboard.writeText(text).then(() => {
+                showMessage('✓ Código copiado com sucesso!', 'success', 2000);
+            }).catch(() => {
+                showMessage('Erro ao copiar. Tente novamente.', 'error');
+            });
+        }
+
+        // ========== MENSAGENS ==========
+        function showMessage(text, type, duration = 3000) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = 'message show ' + type;
+
+            if (duration) {
+                setTimeout(() => {
+                    messageEl.classList.remove('show');
+                }, duration);
+            }
+        }
+
+        // ========== VALIDAR E CONFIRMAR PAGAMENTO ==========
+        async function confirmarPagamento() {
+            let isValid = true;
+
+            if (paymentMethod === 'pix') {
+                const nome = document.getElementById('pixNome').value.trim();
+                const cpf = document.getElementById('pixCpf').value;
+
+                if (!nome) {
+                    showMessage('❌ Por favor, informe seu nome completo', 'error');
+                    return;
+                }
+
+                if (!validarCPF(cpf)) {
+                    showMessage('❌ CPF inválido. Verifique os dígitos', 'error');
+                    return;
+                }
+
+                await salvarPagamento('pix', nome, cpf.replace(/\D/g, ''));
+            } else if (paymentMethod === 'cartao') {
+                const nome = document.getElementById('cartaoNome').value.trim();
+                const cpf = document.getElementById('cartaoCpf').value;
+                const numero = document.getElementById('cartaoNumero').value.replace(/\D/g, '');
+                const validade = document.getElementById('cartaoValidade').value;
+                const cvv = document.getElementById('cartaoCvv').value;
+
+                if (!nome) {
+                    showMessage('❌ Por favor, informe o nome no cartão', 'error');
+                    return;
+                }
+
+                if (!validarCPF(cpf)) {
+                    showMessage('❌ CPF inválido', 'error');
+                    return;
+                }
+
+                if (numero.length !== 16) {
+                    showMessage('❌ Número do cartão deve ter 16 dígitos', 'error');
+                    return;
+                }
+
+                if (validade.length !== 5 || !validade.includes('/')) {
+                    showMessage('❌ Validade deve estar no formato MM/AA', 'error');
+                    return;
+                }
+
+                // Verificar validade (MM/AA > data atual)
+                const [mes, ano] = validade.split('/');
+                const anoCompleto = 2000 + parseInt(ano);
+                const dataValidade = new Date(anoCompleto, parseInt(mes), 0);
+                const hoje = new Date();
+
+                if (dataValidade < hoje) {
+                    showMessage('❌ Cartão expirado', 'error');
+                    return;
+                }
+
+                if (cvv.length !== 3) {
+                    showMessage('❌ CVV deve ter 3 dígitos', 'error');
+                    return;
+                }
+
+                await salvarPagamento('cartao', nome, cpf.replace(/\D/g, ''));
+            } else if (paymentMethod === 'bitcoin') {
+                await salvarPagamento('bitcoin', 'Bitcoin User', '');
+            }
+        }
+
+        // ========== SALVAR PAGAMENTO ==========
+        async function salvarPagamento(metodo, nomeTitular, cpf) {
+            try {
+                const itens = JSON.parse(carrinhoPedido);
+                const total = parseFloat(totalPedido);
+
+                // Salvar pedido
+                const resOrdenacao = await fetch('http://127.0.0.1:8000/salvar_pedido', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        usuario: usuarioLogado,
+                        itens: itens,
+                        pagamento: metodo
+                    })
+                });
+
+                if (!resOrdenacao.ok) {
+                    showMessage('❌ Erro ao processar pedido', 'error');
+                    return;
+                }
+
+                // Salvar pagamento
+                const resPagamento = await fetch('http://127.0.0.1:8000/salvar_pagamento', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        usuario: usuarioLogado,
+                        metodo: metodo,
+                        total: total,
+                        nome_titular: nomeTitular,
+                        cpf: cpf
+                    })
+                });
+
+                if (!resPagamento.ok) {
+                    showMessage('❌ Erro ao salvar pagamento', 'error');
+                    return;
+                }
+
+                // Sucesso!
+                document.getElementById('mainContent').style.display = 'none';
+                document.getElementById('successScreen').classList.add('show');
+
+                // Limpar sessionStorage
+                sessionStorage.removeItem('carrinhoPedido');
+                sessionStorage.removeItem('totalPedido');
+
+                // Redirecionar após 3 segundos
+                setTimeout(() => {
+                    window.location.href = 'loja.html';
+                }, 3000);
+            } catch (error) {
+                console.error('Erro:', error);
+                showMessage('❌ Erro de conexão. Tente novamente', 'error');
+            }
+        }
+
+        // ========== TEMA CLARO/ESCURO ==========
+        function toggleTheme() {
+            const html = document.documentElement;
+            const isDark = html.classList.contains('dark-mode');
+            const btn = document.getElementById('themeToggle');
+
+            if (isDark) {
+                html.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+                btn.innerHTML = '🌙 Escuro';
+            } else {
+                html.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                btn.innerHTML = '☀️ Claro';
+            }
+
+            btn.style.transform = 'scale(0.92)';
+            setTimeout(() => { btn.style.transform = ''; }, 150);
+        }
+
+        function initializeTheme() {
+            const saved = localStorage.getItem('theme') || 'light';
+            const html = document.documentElement;
+            const btn = document.getElementById('themeToggle');
+
+            if (saved === 'dark') {
+                html.classList.add('dark-mode');
+                btn.innerHTML = '☀️ Claro';
+            } else {
+                html.classList.remove('dark-mode');
+                btn.innerHTML = '🌙 Escuro';
+            }
+        }
+
+        initializeTheme();
+
+        // ========== LOGOUT ==========
+        function logout() {
+            if (confirm('Deseja sair? Seu carrinho será perdido.')) {
+                sessionStorage.clear();
+                window.location.href = 'login.html';
+            }
+        }
+
+        // ========== INICIALIZAR ==========
+        carregarResumoPedido();
+    </script>
+</body>
+</html>
