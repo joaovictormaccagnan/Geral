@@ -499,6 +499,122 @@ async def reabastecimento(item_id: int, request: Request):
     finally:
         if conn: conn.close()
 
+# ========== ENDPOINT DE DASHBOARD ==========
+@app.get("/dashboard")
+async def dashboard():
+    """Retorna dados para o dashboard de vendas"""
+    conn = None
+    try:
+        from datetime import datetime, timedelta
+        
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        # Data de hoje
+        hoje = datetime.now().date()
+        ontem = hoje - timedelta(days=1)
+        sete_dias_atras = hoje - timedelta(days=7)
+        
+        # 1. Total de pedidos do dia
+        cursor.execute("""
+            SELECT COUNT(*) as total FROM pedidos
+            WHERE DATE(criado_em) = %s
+        """, (hoje,))
+        total_pedidos_hoje = cursor.fetchone()['total']
+        
+        # 2. Faturamento do dia
+        cursor.execute("""
+            SELECT SUM(total) as faturamento FROM pedidos
+            WHERE DATE(criado_em) = %s
+        """, (hoje,))
+        resultado = cursor.fetchone()
+        faturamento_hoje = float(resultado['faturamento'] or 0)
+        
+        # 3. Ticket médio do dia
+        ticket_medio = faturamento_hoje / total_pedidos_hoje if total_pedidos_hoje > 0 else 0
+        
+        # 4. Item mais vendido do dia
+        cursor.execute("""
+            SELECT itens FROM pedidos
+            WHERE DATE(criado_em) = %s
+        """, (hoje,))
+        pedidos_hoje = cursor.fetchall()
+        
+        item_mais_vendido = "N/A"
+        if pedidos_hoje:
+            item_count = {}
+            for pedido in pedidos_hoje:
+                itens = json.loads(pedido['itens'])
+                for item in itens:
+                    nome = item['nome']
+                    qtd = item['qtd']
+                    item_count[nome] = item_count.get(nome, 0) + qtd
+            
+            if item_count:
+                item_mais_vendido = max(item_count, key=item_count.get)
+        
+        # 5. Faturamento dos últimos 7 dias
+        cursor.execute("""
+            SELECT DATE(criado_em) as data, SUM(total) as total
+            FROM pedidos
+            WHERE DATE(criado_em) >= %s
+            GROUP BY DATE(criado_em)
+            ORDER BY data ASC
+        """, (sete_dias_atras,))
+        
+        faturamento_7dias_raw = cursor.fetchall()
+        faturamento_7dias = []
+        
+        # Preencher todos os dias (incluindo dias sem vendas)
+        data_atual = sete_dias_atras
+        faturamento_dict = {str(row['data']): float(row['total']) for row in faturamento_7dias_raw}
+        
+        for i in range(7):
+            data_str = str(data_atual)
+            faturamento_7dias.append({
+                'data': data_str,
+                'total': faturamento_dict.get(data_str, 0)
+            })
+            data_atual += timedelta(days=1)
+        
+        # 6. Pedidos por forma de pagamento
+        cursor.execute("""
+            SELECT pagamento, COUNT(*) as quantidade
+            FROM pedidos
+            WHERE DATE(criado_em) = %s
+            GROUP BY pagamento
+        """, (hoje,))
+        
+        pedidos_por_pagamento_raw = cursor.fetchall()
+        pedidos_por_pagamento = [
+            {'metodo': row['pagamento'], 'quantidade': row['quantidade']}
+            for row in pedidos_por_pagamento_raw
+        ]
+        
+        return {
+            "sucesso": True,
+            "total_pedidos_hoje": total_pedidos_hoje,
+            "faturamento_hoje": round(faturamento_hoje, 2),
+            "ticket_medio": round(ticket_medio, 2),
+            "item_mais_vendido": item_mais_vendido,
+            "faturamento_7dias": faturamento_7dias,
+            "pedidos_por_pagamento": pedidos_por_pagamento
+        }
+    except Exception as e:
+        print(f"❌ ERRO ao gerar dashboard: {e}")
+        return {
+            "sucesso": False,
+            "erro": str(e),
+            "total_pedidos_hoje": 0,
+            "faturamento_hoje": 0,
+            "ticket_medio": 0,
+            "item_mais_vendido": "N/A",
+            "faturamento_7dias": [],
+            "pedidos_por_pagamento": []
+        }
+    finally:
+        if conn: conn.close()
+
 # ============================================
 # ENDPOINTS DO CHATBOT IA 🤖
 # ============================================

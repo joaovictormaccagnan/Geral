@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Relatório de Pedidos - Maison Café</title>
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF para exportar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <style>
         :root {
             --primary-dark: #6F4E37;
@@ -307,6 +312,105 @@
             transform: translateY(0);
         }
 
+        /* ========== DASHBOARD CARDS ========== */
+        .dashboard-section {
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .dashboard-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--primary-light);
+        }
+
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        :root.dark-mode .card {
+            background: rgba(22, 17, 14, 0.97);
+            border-color: rgba(111, 78, 55, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-label {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-value {
+            color: var(--primary-dark);
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        /* ========== CHARTS SECTION ========== */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-color);
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
+
+        :root.dark-mode .chart-container {
+            background: rgba(22, 17, 14, 0.97);
+            border-color: rgba(111, 78, 55, 0.2);
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
         @media (max-width: 768px) {
             .stats {
                 flex-direction: column;
@@ -359,10 +463,55 @@
                 </div>
             </div>
             <button class="btn" onclick="window.location.reload()">🔄 Atualizar</button>
+            <button class="btn" style="background: linear-gradient(45deg, #0066cc, #0052a3);" onclick="exportarPDF()">📄 Exportar PDF</button>
+            <button class="btn" style="background: linear-gradient(45deg, #ff9900, #cc7700);" onclick="voltarAdmin()">← Voltar</button>
             <button class="btn" style="background: linear-gradient(45deg, #ff4444, #cc0000);" onclick="limparPedidos()">🧹 Limpar Todos</button>
             <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" style="margin: 0 1rem;">🌙 Escuro</button>
             <button class="btn" style="background: linear-gradient(45deg, #666, #333);" onclick="logout()">🚪 Sair</button>
         </header>
+
+        <!-- ========== DASHBOARD SECTION ========== -->
+        <div class="dashboard-section">
+            <h2 class="dashboard-title">📈 Dashboard de Vendas</h2>
+            
+            <!-- Métrica Cards -->
+            <div class="dashboard-cards">
+                <div class="card">
+                    <div class="card-icon">📊</div>
+                    <div class="card-label">Total de Pedidos (Hoje)</div>
+                    <div class="card-value" id="dashboardTotalPedidos">0</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">💰</div>
+                    <div class="card-label">Faturamento (Hoje)</div>
+                    <div class="card-value" id="dashboardFaturamento">R$ 0.00</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-label">Ticket Médio</div>
+                    <div class="card-value" id="dashboardTicketMedio">R$ 0.00</div>
+                </div>
+                <div class="card">
+                    <div class="card-icon">⭐</div>
+                    <div class="card-label">Item Mais Vendido</div>
+                    <div class="card-value" id="dashboardItemMaisVendido" style="font-size: 1rem; overflow-wrap: break-word;">N/A</div>
+                </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3 class="chart-title">📊 Faturamento - Últimos 7 Dias</h3>
+                    <canvas id="chartFaturamento7Dias"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 class="chart-title">💳 Pedidos por Forma de Pagamento</h3>
+                    <canvas id="chartPagamento"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== PEDIDOS TABLE ========== -->
 
         <table id="tabelaPedidos">
             <thead>
@@ -393,6 +542,137 @@
         }
 
         verificarAdmin();
+
+        // ========== CARREGAR DASHBOARD ==========
+        async function carregarDashboard() {
+            try {
+                const res = await fetch('http://127.0.0.1:8000/dashboard');
+                const data = await res.json();
+                
+                if (!data.sucesso) {
+                    console.error('Erro ao carregar dashboard:', data.erro);
+                    return;
+                }
+
+                // Atualizar cards
+                document.getElementById('dashboardTotalPedidos').textContent = data.total_pedidos_hoje;
+                document.getElementById('dashboardFaturamento').textContent = `R$ ${data.faturamento_hoje.toFixed(2)}`;
+                document.getElementById('dashboardTicketMedio').textContent = `R$ ${data.ticket_medio.toFixed(2)}`;
+                document.getElementById('dashboardItemMaisVendido').textContent = data.item_mais_vendido;
+
+                // Renderizar gráfico de faturamento 7 dias
+                renderChartFaturamento7Dias(data.faturamento_7dias);
+
+                // Renderizar gráfico de pagamento
+                renderChartPagamento(data.pedidos_por_pagamento);
+            } catch (err) {
+                console.error('Erro ao carregar dashboard:', err);
+            }
+        }
+
+        // ========== GRÁFICO: FATURAMENTO 7 DIAS ==========
+        function renderChartFaturamento7Dias(dados) {
+            const ctx = document.getElementById('chartFaturamento7Dias').getContext('2d');
+            const labels = dados.map(d => {
+                const date = new Date(d.data);
+                return date.toLocaleDateString('pt-BR', { weekday: 'short', month: 'short', day: 'numeric' });
+            });
+            const values = dados.map(d => d.total);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Faturamento (R$)',
+                        data: values,
+                        backgroundColor: [
+                            '#6F4E37',
+                            '#8B4513',
+                            '#A0826D',
+                            '#D2B48C',
+                            '#B8860B',
+                            '#8B7355',
+                            '#A0522D'
+                        ],
+                        borderColor: '#6F4E37',
+                        borderWidth: 1.5,
+                        borderRadius: 6,
+                        hoverBackgroundColor: '#8B4513'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                                font: { size: 12, weight: '600' }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim(),
+                                callback: function(value) {
+                                    return 'R$ ' + value.toFixed(0);
+                                }
+                            },
+                            grid: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim()
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-secondary').trim()
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ========== GRÁFICO: PAGAMENTO ==========
+        function renderChartPagamento(dados) {
+            const ctx = document.getElementById('chartPagamento').getContext('2d');
+            const labels = dados.map(d => d.metodo.charAt(0).toUpperCase() + d.metodo.slice(1));
+            const values = dados.map(d => d.quantidade);
+            const colors = ['#6F4E37', '#8B4513', '#A0826D', '#D2B48C', '#B8860B'];
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderColor: 'rgba(255, 255, 255, 0.3)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim(),
+                                font: { size: 12, weight: '600' },
+                                padding: 15
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
         async function carregarPedidos() {
             try {
@@ -457,10 +737,132 @@
                     const res = await fetch('http://127.0.0.1:8000/limpar_pedidos', { method: 'DELETE' });
                     const data = await res.json();
                     alert(data.mensagem);
+                    carregarDashboard();
                     carregarPedidos(); // recarrega a tabela
                 } catch (err) {
                     alert('Erro ao limpar pedidos!');
                 }
+            }
+        }
+
+        // ========== VOLTAR PARA ADMIN ==========
+        function voltarAdmin() {
+            window.location.href = 'admin.html';
+        }
+
+        // ========== EXPORTAR PDF ==========
+        function exportarPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Data atual
+                const hoje = new Date();
+                const dataFormatada = hoje.toLocaleDateString('pt-BR');
+                const horaFormatada = hoje.toLocaleTimeString('pt-BR');
+                
+                // Cores Maison Café
+                const corPrincipal = [111, 78, 55]; // #6F4E37
+                const corSecundaria = [212, 165, 116]; // #D4A574
+                const corTexto = [30, 41, 59]; // #1e293b
+                
+                // ========== CABEÇALHO ==========
+                doc.setFillColor(...corPrincipal);
+                doc.rect(0, 0, 210, 30, 'F'); // Fundo marrom
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(24);
+                doc.setFont(undefined, 'bold');
+                doc.text('Maison Cafe', 15, 15);
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.text('Relatorio de Pedidos - ' + dataFormatada + ' as ' + horaFormatada, 15, 23);
+                
+                // Margem
+                let yPosition = 40;
+                
+                // ========== TABELA DE PEDIDOS ==========
+                const table = document.getElementById('tabelaPedidos');
+                const tbody = table.querySelector('tbody');
+                const rows = tbody.querySelectorAll('tr');
+                
+                const tableData = [];
+                let totalGeral = 0;
+                let totalPedidos = 0;
+                
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 5) {
+                        const id = cells[0].textContent.trim();
+                        const usuario = cells[1].textContent.trim();
+                        const itens = cells[2].textContent.trim().substring(0, 40); // Resumir itens
+                        const pagamento = cells[3].textContent.trim();
+                        const total = cells[4].textContent.trim();
+                        
+                        tableData.push([id, usuario, itens, pagamento, total]);
+                        totalPedidos++;
+                        
+                        // Extrair valor numérico do total
+                        const valorTotal = parseFloat(total.replace('R$', '').replace(',', '.'));
+                        if (!isNaN(valorTotal)) {
+                            totalGeral += valorTotal;
+                        }
+                    }
+                });
+                
+                // Adicionar tabela com autoTable
+                doc.autoTable({
+                    startY: yPosition,
+                    head: [['ID', 'Usuario', 'Itens', 'Pagamento', 'Total']],
+                    body: tableData,
+                    headStyles: {
+                        fillColor: corPrincipal,
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold',
+                        fontSize: 11,
+                        halign: 'center'
+                    },
+                    bodyStyles: {
+                        textColor: corTexto,
+                        fontSize: 10
+                    },
+                    alternateRowStyles: {
+                        fillColor: [245, 247, 250] // Luz cinza
+                    },
+                    columnStyles: {
+                        0: { halign: 'center', cellWidth: 20 },
+                        1: { halign: 'left', cellWidth: 40 },
+                        2: { halign: 'left', cellWidth: 50 },
+                        3: { halign: 'center', cellWidth: 30 },
+                        4: { halign: 'right', cellWidth: 30 }
+                    },
+                    margin: { top: 10, right: 15, left: 15, bottom: 30 },
+                    didDrawPage: function(data) {
+                        // Rodapé
+                        const pageHeight = doc.internal.pageSize.getHeight();
+                        const pageWidth = doc.internal.pageSize.getWidth();
+                        
+                        doc.setTextColor(...corPrincipal);
+                        doc.setFontSize(10);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('Total de Pedidos: ' + totalPedidos, 15, pageHeight - 15);
+                        doc.text('Faturamento Total: R$ ' + totalGeral.toFixed(2), pageWidth - 80, pageHeight - 15);
+                    }
+                });
+                
+                // ========== NOME E DOWNLOAD ==========
+                const ano = hoje.getFullYear();
+                const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+                const dia = String(hoje.getDate()).padStart(2, '0');
+                const nomePDF = 'relatorio_maison_cafe_' + ano + '-' + mes + '-' + dia + '.pdf';
+                doc.save(nomePDF);
+                
+                console.log('PDF exportado com sucesso:', nomePDF);
+            } catch (err) {
+                console.error('Erro ao gerar PDF:', err);
+                alert('Erro ao exportar PDF. Verifique o console.');
             }
         }
 
@@ -470,9 +872,6 @@
                 window.location.href = 'index.html';
             }
         }
-        
-        carregarPedidos();
-        setInterval(carregarPedidos, 10000); // Atualiza a cada 10s
 
         // ========== TEMA CLARO/ESCURO ==========
         function toggleTheme() {
@@ -509,6 +908,14 @@
         }
 
         initializeTheme();
+
+        // Carregar dashboard e pedidos ao iniciar
+        carregarDashboard();
+        carregarPedidos();
+        setInterval(() => {
+            carregarDashboard();
+            carregarPedidos();
+        }, 10000); // Atualiza a cada 10s
     </script>
 
 <!-- 🤖 Chatbot IA Widget -->

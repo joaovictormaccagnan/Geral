@@ -896,6 +896,52 @@
             gerarQRCodeBitcoin();
         }
 
+        // ========== GERAR PAYLOAD PIX CORRETO ==========
+        function gerarPixPayload(valor) {
+            // valor é um float, ex: 12.50
+            const valorStr = parseFloat(valor).toFixed(2).replace('.', ''); // "1250"
+            const tamanhoValor = String(valorStr.length).padStart(2, '0');  // "04"
+
+            function campo(id, valor) {
+                const tam = String(valor.length).padStart(2, '0');
+                return id + tam + valor;
+            }
+
+            const pixKey = 'maison.cafe@escola.com.br'; // chave PIX fictícia
+            const merchantName = 'MAISON CAFE';
+            const merchantCity = 'MARINGA';
+            const txid = '***';
+
+            const gui = campo('00', 'br.gov.bcb.pix') + campo('01', pixKey);
+            const merchantAccountInfo = campo('26', gui);
+            const additionalData = campo('62', campo('05', txid));
+            const payload =
+                campo('00', '01') +
+                merchantAccountInfo +
+                campo('52', '0000') +
+                campo('53', '986') +
+                campo('54', parseFloat(valor).toFixed(2)) +
+                campo('58', 'BR') +
+                campo('59', merchantName) +
+                campo('60', merchantCity) +
+                additionalData +
+                '6304';  // CRC placeholder
+
+            // Calcular CRC16-CCITT
+            function crc16(str) {
+                let crc = 0xFFFF;
+                for (let i = 0; i < str.length; i++) {
+                    crc ^= str.charCodeAt(i) << 8;
+                    for (let j = 0; j < 8; j++) {
+                        crc = (crc & 0x8000) ? (crc << 1) ^ 0x1021 : crc << 1;
+                    }
+                }
+                return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+            }
+
+            return payload + crc16(payload);
+        }
+
         // ========== GERAR QR CODE PIX ==========
         function gerarQRCodePix() {
             const nome = document.getElementById('pixNome').value.trim();
@@ -908,17 +954,17 @@
             const container = document.getElementById('qrcodePixContainer');
             container.innerHTML = '';
 
-            // Dados Pix fictícios
-            const pixData = `00020126580014br.gov.bcb.pix0136xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx5204000053039865406${totalPedido.replace('.', '').padStart(10, '0')}5802BR5913MAISON CAFE6009MARINGA62410503***`;
+            // Gerar payload PIX correto
+            const pixData = gerarPixPayload(parseFloat(totalPedido));
 
-            const qr = qrcode(4, 'M');
+            const qr = qrcode(6, 'M');
             qr.addData(pixData);
             qr.make();
 
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             const moduleCount = qr.getModuleCount();
-            const pixelSize = 3;
+            const pixelSize = 4;
 
             canvas.width = moduleCount * pixelSize;
             canvas.height = moduleCount * pixelSize;
@@ -1128,7 +1174,7 @@
         function logout() {
             if (confirm('Deseja sair? Seu carrinho será perdido.')) {
                 sessionStorage.clear();
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             }
         }
 
