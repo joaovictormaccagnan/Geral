@@ -1,7 +1,8 @@
 """
-🤖 CHATBOT IA - Maison Café com Ollama
+🤖 CHATBOT IA - Maison Café com Ollama + MySQL
 Responde perguntas sobre receitas, produtos e suporte ao site
 Usa Ollama (IA local) com fallback para base de conhecimento local
+Salva e aproveita histórico de conversas via MySQL
 """
 
 import json
@@ -11,14 +12,16 @@ import urllib.error
 from typing import Dict, List
 
 # ============================================================
+# INTEGRAÇÃO COM O BANCO DE DADOS
+# ============================================================
+from database import db  # <-- importa a instância global
+
+
+# ============================================================
 # CONFIGURAÇÃO OLLAMA
 # ============================================================
-# Endereço padrão do Ollama (rodando localmente)
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
-
-# Modelo a usar - altere para o modelo que você tiver instalado
-# Exemplos: "llama3", "llama3.2", "mistral", "gemma2", "phi3"
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:7b")  # Altere para o modelo que você tem
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2.5-coder:7b")
 
 # BASE DE CONHECIMENTO - FAQs e Receitas
 KNOWLEDGE_BASE = {
@@ -101,15 +104,25 @@ KNOWLEDGE_BASE = {
 
 
 class ChatbotIA:
-    """Chatbot inteligente com Ollama (IA local) + fallback local"""
+    """Chatbot inteligente com Ollama (IA local) + fallback + histórico MySQL"""
 
     def __init__(self):
         self.historico = []
         self.usando_ollama = False
         self.modo_atual = "local"
 
-        # Verificar se Ollama está disponível
+        # Sessão atual no banco de dados
+        self.session_id = db.criar_session("guest")
+
         self._verificar_ollama()
+
+        # Mostrar status do banco
+        if db.disponivel:
+            stats = db.estatisticas()
+            print(f"📊 Banco de dados: {stats.get('total_mensagens', 0)} mensagens salvas | "
+                  f"{stats.get('total_sessoes', 0)} sessões")
+        else:
+            print("📝 Histórico desativado (banco indisponível)")
 
     def _verificar_ollama(self):
         """Verifica se Ollama está rodando e o modelo está disponível"""
@@ -137,16 +150,25 @@ class ChatbotIA:
             print("   Usando IA local como fallback.")
             self.modo_atual = "local"
 
+    def nova_sessao(self, usuario_id: str = "guest"):
+        """Inicia uma nova sessão (ex: novo usuário ou nova conversa)"""
+        self.session_id = db.criar_session(usuario_id)
+        self.historico = []
+        print(f"🆕 Nova sessão criada: {self.session_id}")
+
     def processar_entrada(self, mensagem: str, usuario_id: str = "guest") -> Dict:
         """Processa a entrada do usuário com Ollama (se disponível) ou fallback local"""
         mensagem = mensagem.strip()
 
-        # Armazenar no histórico
+        # Armazenar no histórico em memória
         self.historico.append({
             "usuario": usuario_id,
             "mensagem": mensagem,
             "tipo": "pergunta"
         })
+
+        # ── SALVAR PERGUNTA NO BANCO ──────────────────────────────
+        db.salvar_mensagem(self.session_id, "user", mensagem)
 
         # Tentar Ollama primeiro
         if self.usando_ollama:
@@ -154,12 +176,15 @@ class ChatbotIA:
         else:
             resposta_texto = self._gerar_resposta_local(mensagem)
 
-        # Armazenar resposta
+        # Armazenar resposta em memória
         self.historico.append({
             "usuario": "chatbot",
             "mensagem": resposta_texto,
             "tipo": "resposta"
         })
+
+        # ── SALVAR RESPOSTA NO BANCO ──────────────────────────────
+        db.salvar_mensagem(self.session_id, "assistant", resposta_texto, self.modo_atual)
 
         return {
             "resposta": resposta_texto,
@@ -170,8 +195,11 @@ class ChatbotIA:
         }
 
     def _gerar_resposta_ollama(self, mensagem: str) -> str:
-        """Usa Ollama para gerar resposta inteligente"""
+        """Usa Ollama para gerar resposta inteligente, aproveitando histórico do banco"""
         try:
+            # ── BUSCAR CONTEXTO RELEVANTE DO BANCO ───────────────
+            contexto_bd = db.buscar_contexto_relevante(mensagem, limite=5)
+
             system_prompt = """Você é um assistente virtual do Maison Café, uma cafeteria especializada.
 
 Informações do Maison Café:
@@ -188,12 +216,26 @@ Responda SEMPRE em português brasileiro, de forma amigável, concisa e útil.
 Se não souber algo específico, seja honesto e sugira contato com o Maison Café.
 Não invente preços ou informações que não foram fornecidas."""
 
+            # Monta lista de mensagens: contexto histórico + pergunta atual
+            messages = [{"role": "system", "content": system_prompt}]
+
+            if contexto_bd:
+                # Adiciona contexto de conversas anteriores relevantes
+                resumo = "Contexto de conversas anteriores relevantes:\n"
+                for m in contexto_bd:
+                    prefixo = "Cliente perguntou" if m["role"] == "user" else "Você respondeu"
+                    resumo += f"- {prefixo}: {m['content'][:200]}\n"
+
+                messages.append({
+                    "role": "system",
+                    "content": resumo
+                })
+
+            messages.append({"role": "user", "content": mensagem})
+
             payload = json.dumps({
                 "model": OLLAMA_MODEL,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": mensagem}
-                ],
+                "messages": messages,
                 "stream": False,
                 "options": {
                     "temperature": 0.7,
@@ -213,7 +255,8 @@ Não invente preços ou informações que não foram fornecidas."""
                 resposta = data.get("message", {}).get("content", "").strip()
 
                 if resposta:
-                    print(f"✅ Resposta via Ollama ({OLLAMA_MODEL})")
+                    usou_contexto = f" + {len(contexto_bd)} msgs do histórico" if contexto_bd else ""
+                    print(f"✅ Resposta via Ollama ({OLLAMA_MODEL}{usou_contexto})")
                     return resposta
                 else:
                     print("⚠️ Ollama retornou resposta vazia, usando fallback")
@@ -358,10 +401,14 @@ Não invente preços ou informações que não foram fornecidas."""
         return sugestoes
 
     def obter_historico(self, usuario_id: str = None) -> List:
-        """Retorna histórico de conversa"""
+        """Retorna histórico em memória (sessão atual)"""
         if usuario_id:
             return [m for m in self.historico if m.get("usuario") == usuario_id or m.get("usuario") == "chatbot"]
         return self.historico
+
+    def obter_historico_banco(self, limite: int = 20) -> List:
+        """Retorna histórico persistido no banco para a sessão atual"""
+        return db.buscar_historico_sessao(self.session_id, limite)
 
 
 # Instância global
